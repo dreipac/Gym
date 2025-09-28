@@ -775,15 +775,16 @@ body{
   }
 }
 
-/* iOS Safe-Area: Inhalt sicher unter Notch/Statusbar darstellen */
-body{
-  padding-top: env(safe-area-inset-top);
+/* iOS Safe-Area – solide Statusbar (black): Kein Padding am Body nötig */
+html, body{
+  background-color: #0b1117; /* gleiche Grundfarbe wie dein Gradient-BG */
 }
 
-/* Falls die Topbar im Desktop oben klebt, etwas mehr “Atemraum” geben */
+/* Desktop-Topbar bleibt gemütlich */
 @media (min-width: 769px){
   .topbar{
-    padding-top: calc(14px + env(safe-area-inset-top));
+    padding-top: 14px; /* kein env() hier nötig, Statusbar ist nicht translucide */
   }
 }
+
 
