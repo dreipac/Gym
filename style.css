@@ -775,3 +775,15 @@ body{
   }
 }
 
+/* iOS Safe-Area: Inhalt sicher unter Notch/Statusbar darstellen */
+body{
+  padding-top: env(safe-area-inset-top);
+}
+
+/* Falls die Topbar im Desktop oben klebt, etwas mehr “Atemraum” geben */
+@media (min-width: 769px){
+  .topbar{
+    padding-top: calc(14px + env(safe-area-inset-top));
+  }
+}
+
