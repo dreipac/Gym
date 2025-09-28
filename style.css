@@ -787,4 +787,24 @@ html, body{
   }
 }
 
+/* iOS: Auto-Zoom beim Fokussieren verhindern (Inputs >=16px) */
+@media (max-width: 768px){
+  input,
+  select,
+  textarea,
+  .field input,
+  .field select,
+  .field textarea,
+  .sw-weights .weight-input,
+  .gear-input,
+  .weight-input {
+    font-size: 16px !important;
+    line-height: 1.25;
+  }
+}
+
+/* Safari/iOS: keine Text-Autovergrößerung */
+html { -webkit-text-size-adjust: 100%; }
+
+
 
