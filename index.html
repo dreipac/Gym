@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GymPlan</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+<header class="topbar">
+  <!-- Brand bleibt für Desktop sichtbar, wird mobil ausgeblendet -->
+  <div class="brand">
+    <span class="logo">🏋️</span>
+    <span class="title">GymPlan</span>
+  </div>
+
+  <!-- Nav: Icons + (zugängliche) Labels -->
+  <nav class="nav">
+    <!-- Spotlight-Höcker-Hintergrund -->
+    <span class="nav-spot" aria-hidden="true"></span>
+
+    <a href="#/heute" class="nav-link" data-route="heute" aria-label="Heute">
+      <span class="icon" aria-hidden="true">🏠</span>
+      <span class="label">Heute</span>
+    </a>
+    <a href="#/kalender" class="nav-link" data-route="kalender" aria-label="Kalender">
+      <span class="icon" aria-hidden="true">📅</span>
+      <span class="label">Kalender</span>
+    </a>
+    <a href="#/konfigurieren" class="nav-link" data-route="konfigurieren" aria-label="Konfigurieren">
+      <span class="icon" aria-hidden="true">🛠️</span>
+      <span class="label">Konfigurieren</span>
+    </a>
+    <a href="#/einstellungen" class="nav-link" data-route="einstellungen" aria-label="Einstellungen">
+      <span class="icon" aria-hidden="true">⚙️</span>
+      <span class="label">Einstellungen</span>
+    </a>
+  </nav>
+
+</header>
+
+
+    <main id="view" class="view" aria-live="polite"></main>
+
+    <footer class="footer">
+      <div>Made for mobile &amp; desktop • <a href="#/einstellungen" class="link-muted">Einstellungen</a></div>
+    </footer>
+  </div>
+
+  <!-- HEUTE -->
+  <template id="tpl-heute">
+    <section class="section">
+      <div class="glass card card--big">
+        <div class="card-header">
+          <h1 id="today-title">Heute</h1>
+          <div class="subtle" id="today-date"></div>
+        </div>
+
+<div class="today-body">
+  <div class="today-plan">
+    <div class="pill" id="today-plan-pill">Lade...</div>
+    <p class="muted" id="today-note"></p>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-num" id="stat-streak">0</div>
+      <div class="stat-label">Streak (Tage)</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" id="stat-7d">0%</div>
+      <div class="stat-label">Erfolg · 7 Tage</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" id="stat-30d">0%</div>
+      <div class="stat-label">Erfolg · 30 Tage</div>
+    </div>
+  </div>
+
+<!-- Stoppuhr mit Ein-/Ausklappen (kompakt/klassisch) -->
+<div class="stopwatch glass" id="sw" aria-live="polite" aria-atomic="true" hidden>
+  <div class="sw-head">
+    <span class="sw-title">Aktives Training</span>
+    <div class="sw-meta">
+      <!-- Plan-Badge wie im Original-Header (wird im Kompaktmodus ausgeblendet) -->
+      <span class="badge" id="sw-plan-badge">–</span>
+
+      <!-- Zeit für KOMPAKTMODUS (eine Zeile) -->
+      <span class="sw-time-inline js-sw-time">00:00:00</span>
+
+      <!-- Status-Badge bleibt im Header -->
+      <span class="badge" id="sw-state-badge">Läuft</span>
+
+      <!-- Toggle -->
+      <button class="sw-toggle" id="btn-sw-toggle" aria-label="Stoppuhr einklappen" title="Einklappen">−</button>
+    </div>
+  </div>
+
+  <!-- Klassische Ansicht (wie vorher) -->
+  <div class="sw-body">
+    <div class="time-large js-sw-time">00:00:00</div>
+    
+    <!-- Gerätegruppen mit letztem/aktuellem Gewicht -->
+    <div id="sw-weights" class="sw-weights"></div>
+
+
+    <div class="sw-actions">
+      <button class="btn subtle" id="btn-sw-pause">Pausieren</button>
+      <button class="btn danger" id="btn-sw-stop">Training beenden</button>
+    </div>
+
+    <p class="muted" id="sw-hint">Die App läuft im Hintergrund weiter</p>
+  </div>
+</div>
+
+
+
+
+
+  <div class="actions">
+    <!-- NEU: Start/Stop-Logik via JS; „Erledigt“ bleibt als Abschlussoption -->
+    <button class="btn primary" id="btn-start" hidden>Training starten</button>
+    <button class="btn subtle" id="btn-done">Training erledigt</button>
+    <button class="btn subtle" id="btn-skip">Für heute überspringen</button>
+    <a class="btn ghost" href="#/kalender">Plan bearbeiten</a>
+  </div>
+</div>
+
+      </div>
+
+      <div class="glass card">
+        <h2>Nächste Termine</h2>
+        <ul class="list" id="upcoming-list" aria-live="polite"></ul>
+      </div>
+    </section>
+  </template>
+
+  <!-- KALENDER -->
+  <template id="tpl-kalender">
+    <section class="section">
+      <div class="glass card">
+        <div class="calendar-head">
+          <button class="icon-btn" id="cal-prev" aria-label="vorheriger Monat">‹</button>
+          <h1 id="cal-title">Kalender</h1>
+          <button class="icon-btn" id="cal-next" aria-label="nächster Monat">›</button>
+        </div>
+        <div class="calendar" id="calendar" role="grid" aria-label="Trainingskalender"></div>
+      </div>
+
+      <div class="glass card">
+        <h2 id="edit-date-label">Datum wählen</h2>
+        <div class="edit-grid">
+          <label class="field">
+            <span>Training</span>
+            <select id="training-type">
+              <option value="">— Kein Training / Ruhetag —</option>
+              <option>Ganzkörper</option>
+              <option>Push</option>
+              <option>Pull</option>
+              <option>Beine</option>
+              <option>Oberkörper</option>
+              <option>Cardio</option>
+              <option>HIIT</option>
+              <option>Mobility</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Notiz (optional)</span>
+            <input id="training-note" type="text" placeholder="z. B. 5x5 Kniebeugen" />
+          </label>
+
+          <div class="edit-actions">
+            <button class="btn primary" id="btn-save">Speichern</button>
+            <button class="btn danger ghost" id="btn-clear">Eintrag löschen</button>
+            <a class="btn subtle" href="#/heute">Zurück zu Heute</a>
+          </div>
+
+          <hr class="divider"/>
+
+          <div class="tpl-grid">
+            <label class="field">
+              <span>Vorlage</span>
+              <select id="tpl-select">
+                <!-- per JS befüllt -->
+              </select>
+            </label>
+            <div class="tpl-actions">
+              <button class="btn subtle" id="btn-tpl-apply">Vorlage laden</button>
+              <button class="btn subtle" id="btn-tpl-save">Aktuelles als Vorlage speichern</button>
+              <button class="btn subtle" id="btn-copy-weeks">Auf nächsten 4 Wochen kopieren</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </template>
+
+  <!-- EINSTELLUNGEN -->
+  <template id="tpl-settings">
+    <section class="section">
+      <div class="glass card card--big">
+        <h1>Einstellungen</h1>
+        <p class="muted">Daten sichern, wiederherstellen und zurücksetzen.</p>
+
+        <div class="settings-grid">
+          <div class="settings-block">
+            <h3>Export</h3>
+            <p>Speichere alle Daten als JSON-Datei.</p>
+            <button class="btn primary" id="btn-export">Exportieren</button>
+          </div>
+
+          <div class="settings-block">
+            <h3>Import</h3>
+            <p>JSON-Datei laden und Daten überschreiben.</p>
+            <input type="file" id="file-import" accept="application/json" />
+          </div>
+
+          <div class="settings-block danger-block">
+            <h3>Zurücksetzen</h3>
+            <p>Alle lokalen Daten löschen (Pläne, Erledigt, Vorlagen).</p>
+            <button class="btn danger ghost" id="btn-reset">Alles löschen</button>
+          </div>
+        </div>
+
+        <a class="btn subtle" href="#/heute">Zurück</a>
+      </div>
+    </section>
+  </template>
+
+
+<!-- KONFIGURIEREN -->
+<template id="tpl-konfig">
+  <section class="section">
+    <div class="glass card card--big">
+      <h1>Konfigurieren</h1>
+      <p class="muted">Verwalte deine Trainingseinheiten. Jede Einheit kann eine Liste von Geräten besitzen.</p>
+
+      <div class="cfg-grid">
+        <div class="glass settings-block">
+          <h3>Trainingseinheiten</h3>
+          <div class="actions" style="margin-bottom:10px">
+            <button class="btn primary" id="cfg-new">Neue Trainingseinheit</button>
+          </div>
+          <ul class="list" id="cfg-list" aria-live="polite"></ul>
+        </div>
+      </div>
+
+      <a class="btn subtle" href="#/kalender">Zum Kalender</a>
+    </div>
+  </section>
+</template>
+
+<!-- KONFIG-EDITOR (Neu/Bearbeiten) -->
+<template id="tpl-konfig-editor">
+  <section class="section">
+    <div class="glass card card--big">
+      <h1 id="ke-title">Trainingseinheit</h1>
+      <p class="muted">Gib einen Namen und (optional) Geräte an. Je Gerät ein Textfeld. Bei Bedarf kannst du weitere Felder hinzufügen.</p>
+
+      <!-- Felder direkt auf der Hauptkarte (keine zweite Box) -->
+      <div class="cfg-grid">
+        <div class="field">
+          <span>Name der Einheit</span>
+          <input id="ke-name" type="text" placeholder="z. B. Oberkörper" />
+        </div>
+
+        <div class="field">
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+            <span>Geräte</span>
+            <button class="btn subtle" id="ke-add" type="button" title="Weiteres Gerät hinzufügen">＋</button>
+          </div>
+          <!-- Dynamische Liste der Gerätetextfelder -->
+          <div id="ke-geraete-list" style="display:grid; gap:8px;"></div>
+        </div>
+
+        <div class="actions">
+          <button class="btn primary" id="ke-save">Speichern</button>
+          <a class="btn subtle" href="#/konfigurieren" id="ke-cancel">Abbrechen</a>
+        </div>
+
+        <p class="muted" id="ke-hint"></p>
+      </div>
+
+      <a class="btn subtle" href="#/konfigurieren">Zurück</a>
+    </div>
+  </section>
+</template>
+
+
+
+
+
+  <!-- 404 -->
+  <template id="tpl-404">
+    <section class="section">
+      <div class="glass card card--big">
+        <h1>Seite nicht gefunden</h1>
+        <p>Ups – diese Route gibt’s nicht. Zurück zur <a href="#/heute">Startseite</a>.</p>
+      </div>
+    </section>
+  </template>
+
+  <script src="app.js"></script>
+</body>
+</html>
