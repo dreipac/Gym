@@ -1,4 +1,4 @@
-:root{
+::root{
   /* Farb-Theme */
   --glass-bg: rgba(255,255,255,.1);
   --glass-brd: rgba(255,255,255,.25);
@@ -9,12 +9,12 @@
   --danger: #ef4444;
   --shadow: 0 20px 60px rgba(0,0,0,.35);
 
-  /* Hintergrund-Farben/Glimmer */
-  --bg-base-1: #0b1117;   /* dunkel */
-  --bg-base-2: #0e141b;   /* etwas heller */
-  --glow-cyan:  #22d3ee;
-  --glow-mint:  #6ee7b7;
-  --glow-violet:#a78bfa;
+  /* Cosmic Hintergrund */
+  --bg-base-1: #05060a;   /* sehr dunkel, fast schwarz */
+  --bg-base-2: #0b0f18;   /* tiefes Blau */
+  --glow-turquoise: #3ef2ff;
+  --glow-violet:   #9b5dff;
+  --glow-gold:     #ffcc66;
 }
 
 
@@ -30,12 +30,10 @@ body{
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji","Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
   color: var(--txt);
 
-  /* Modern: nur Farben & Leuchten, kein Bild */
   background:
-    radial-gradient(1200px 700px at 15% 10%, color-mix(in oklab, var(--glow-cyan) 25%, transparent), transparent 60%),
-    radial-gradient(900px 600px at 85% 20%,  color-mix(in oklab, var(--glow-mint) 25%, transparent), transparent 60%),
-    radial-gradient(1000px 800px at 70% 90%, color-mix(in oklab, var(--glow-violet) 18%, transparent), transparent 70%),
-    conic-gradient(from 220deg at 70% 120%, rgba(255,255,255,.05), rgba(255,255,255,0) 25%),
+    radial-gradient(1000px 700px at 20% 20%, color-mix(in oklab, var(--glow-turquoise) 22%, transparent), transparent 70%),
+    radial-gradient(1200px 900px at 80% 25%, color-mix(in oklab, var(--glow-violet) 18%, transparent), transparent 75%),
+    radial-gradient(1400px 1000px at 40% 85%, color-mix(in oklab, var(--glow-gold) 15%, transparent), transparent 80%),
     linear-gradient(180deg, var(--bg-base-1), var(--bg-base-2));
   background-attachment: fixed;
   background-repeat: no-repeat;
@@ -61,21 +59,22 @@ body{
   transform: translateZ(0);
 }
 
-/* großer Cyan/Mint-Glow links unten */
+/* großer Nebel links unten */
 #app::before{
-  left:-10vw; bottom:-10vh; width:55vw; height:55vh;
+  left:-20vw; bottom:-20vh; width:60vw; height:60vh;
   background:
-    radial-gradient(closest-side, color-mix(in oklab, var(--glow-cyan) 35%, transparent) 0%, transparent 70%),
-    radial-gradient(closest-side, color-mix(in oklab, var(--glow-mint) 30%, transparent) 0%, transparent 75%);
-  animation: floatGlowA 18s ease-in-out infinite alternate;
+    radial-gradient(closest-side, color-mix(in oklab, var(--glow-turquoise) 35%, transparent) 0%, transparent 80%),
+    radial-gradient(closest-side, color-mix(in oklab, var(--glow-violet) 25%, transparent) 0%, transparent 85%);
+  animation: floatGlowA 22s ease-in-out infinite alternate;
 }
 
-/* violetter Akzent rechts oben */
+/* Nebel rechts oben */
 #app::after{
-  right:-8vw; top:-8vh; width:45vw; height:45vh;
+  right:-15vw; top:-15vh; width:55vw; height:55vh;
   background:
-    radial-gradient(closest-side, color-mix(in oklab, var(--glow-violet) 30%, transparent) 0%, transparent 70%);
-  animation: floatGlowB 22s ease-in-out infinite alternate;
+    radial-gradient(closest-side, color-mix(in oklab, var(--glow-gold) 30%, transparent) 0%, transparent 75%),
+    radial-gradient(closest-side, color-mix(in oklab, var(--glow-violet) 20%, transparent) 0%, transparent 80%);
+  animation: floatGlowB 28s ease-in-out infinite alternate;
 }
 
 @keyframes floatGlowA{
