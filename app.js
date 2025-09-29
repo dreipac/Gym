@@ -279,6 +279,7 @@ function setRoute(hash){
 
     // Route-spezifische Body-Klasse (für mobiles Scroll-Verhalten im Kalender)
     document.body.classList.toggle("route-kalender", state.route === "kalender");
+    document.body.classList.toggle("route-heute", state.route === "heute");
 
     // ENTER-Phase
     view.classList.add("route-enter");
@@ -464,6 +465,8 @@ function renderHeute(root){
   q("#today-title", root).textContent = "Heute";
   q("#today-date", root).textContent = fmtLong(today);
 
+
+  
   const pill = q("#today-plan-pill", root);
   pill.textContent = entry.type ? entry.type : "Ruhetag / frei";
   pill.style.background = "none";
@@ -498,6 +501,9 @@ function renderHeute(root){
   const t = state.timer;
   const running = !!t.startedAt || t.paused;
   const trainingDay = isTrainingDay(key);
+    // Heute wie Kalender scrollen lassen, wenn Trainingstag
+  
+
 
   // === NEU: Bei Ruhetag Stoppuhr komplett entfernen und passende Buttons zeigen ===
   if (!trainingDay){
