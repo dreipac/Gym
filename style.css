@@ -17,6 +17,7 @@
   --glow-violet:#a78bfa;
 }
 
+
 /* iOS Safe-Area (Home-Indicator) */
 :root{
   --safe-bottom: env(safe-area-inset-bottom);
@@ -424,6 +425,18 @@ body{
     min-height: 0; /* erlaubt dem inneren Scrollbereich, zu schrumpfen */
   }
 
+  /* 👉 Heute: große Karte soll bis zur Bottom-Bar reichen, View scrollt */
+body.route-heute .card--big{
+  height: calc(100dvh - 120px);  /* Header+Footer/Topbar abziehen */
+  max-height: calc(100dvh - 120px);
+}
+
+body.route-heute .card--big .today-body{
+  overflow: auto; /* Inhalt kann innerhalb scrollen */
+  min-height: 0;
+}
+
+
 
   
   /* Typische Inhaltscontainer in den großen Karten, die lang werden können */
@@ -440,12 +453,13 @@ body{
     flex: 0 0 auto;
   }
 
-  /* 👉 Sonderfall: NUR im Kalender-Tab darf die gesamte View scrollen,
-     damit beide Container vollständig sichtbar sind */
-  body.route-kalender .view{
-    overflow: auto;
-    -webkit-overflow-scrolling: touch;
-  }
+/* 👉 Tabs, in denen die gesamte View scrollen soll (Kalender & Heute) */
+body.route-kalender .view,
+body.route-heute .view{
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 }
 
 
