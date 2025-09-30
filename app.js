@@ -465,7 +465,6 @@ function renderHeute(root){
   q("#today-title", root).textContent = "Heute";
   q("#today-date", root).textContent = fmtLong(today);
 
-
   
   const pill = q("#today-plan-pill", root);
   pill.textContent = entry.type ? entry.type : "Ruhetag / frei";
