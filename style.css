@@ -95,12 +95,6 @@ body{
 }
 
 
-/* Motion-Respect */
-@media (prefers-reduced-motion: reduce){
-  #app::before, #app::after{ animation: none }
-}
-
-
 
 /* Layout */
 .topbar{
@@ -142,15 +136,18 @@ body{
 .card--big{padding:22px}
 .card-header h1{margin:0 0 6px 0}
 .subtle{color:var(--muted)}
-.muted{color:var(--muted); margin:6px 0 0}
+.muted{color:var(--muted); margin:2px 0 0}
+.today-plan .muted{
+  margin: 2px 0 0;     /* war effektiv 6px → jetzt 2px */
+}
+
 
 /* Today */
 .today-body{display:grid; gap:18px}
 .pill{
   display:block;
-  margin-top:14px;
+  margin-top:5px;
   padding-top:10px;
-  border-top:1px solid rgba(255,255,255,.15);
   font-weight:600;
   font-size:1rem;
   color: var(--txt);
@@ -165,10 +162,28 @@ body{
   font-weight:600; cursor:pointer; transition: .2s transform ease, .2s opacity ease;
 }
 .btn:active{transform: translateY(1px)}
-.btn.primary{
-  background: linear-gradient(135deg, #22d3ee, #6ee7b7);
-  color:#05313a;
+/* Primärer Button – neues Design */
+.btn.primary {
+  background: linear-gradient(180deg, #3dd5f3 0%, #0ea5e9 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 14px;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(14,165,233,.35);
+  transition: all 0.25s ease;
 }
+
+.btn.primary:hover {
+  background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%);
+  box-shadow: 0 6px 16px rgba(14,165,233,.45);
+  transform: translateY(-1px);
+}
+
+.btn.primary:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 8px rgba(14,165,233,.25);
+}
+
 .btn.subtle{ text-decoration: none;  background: rgba(255,255,255,.08); color:var(--txt); border:1px solid rgba(255,255,255,.18)}
 .btn.ghost{text-decoration: none; background: transparent; color: var(--txt); border:1px dashed rgba(255,255,255,.3)}
 .btn.danger{border-color: rgba(239,68,68,.6); color:#1f1f1f}
@@ -188,6 +203,11 @@ body{
 .divider{
   border:0; height:1px; background: rgba(255,255,255,.12); margin:8px 0;
 }
+
+.today-plan .divider{
+  margin: 4px 0;       /* war effektiv 8px → jetzt halbiert */
+}
+
 
 /* List */
 .list{list-style:none; margin:0; padding:0; display:grid; gap:10px}
@@ -225,8 +245,6 @@ body{
 .day.out{opacity:.35}
 .day:hover{outline:2px solid rgba(255,255,255,.2)}
 .day .num{font-weight:700}
-.day .tag{font-size:.8rem; line-height:1.1; opacity:.95}
-.day .dot{width:8px; height:8px; border-radius:999px; position:absolute; bottom:8px; right:8px; background: linear-gradient(135deg, #22d3ee, #6ee7b7)}
 .day.today{border-color:rgba(110,231,183,.9); box-shadow: 0 0 0 2px rgba(110,231,183,.3) inset}
 
 /* Form */
@@ -266,15 +284,23 @@ body{
 .cfg-item-sub{color:var(--muted); font-size:.9rem}
 .cfg-list-btn{background: rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.18); border-radius:10px; padding:6px 10px; cursor:pointer}
 
-/* ===== Stopwatch ===== */
+/* ===== Stopwatch: als Abschnitt in Heute-Karte ===== */
 .stopwatch{
-  padding:16px;
-  display:grid;
-  gap:12px;
-  border-radius:14px;
-  border:1px solid rgba(255,255,255,.12);
-  background: rgba(255,255,255,.06);
+  padding: 12px 0 0;     /* oben etwas Luft, unten bündig */
+  display: grid;
+  gap: 12px;
+  border: none;
+  background: transparent;
+  border-radius: 0;
 }
+
+/* Smoothes Schrumpfen der Stoppuhr-Karte ohne Layout-Jump */
+#sw{
+  overflow: hidden;            /* Inhalt beim Schrumpfen verstecken */
+  max-height: 1000px;          /* groß genug für ausgeklappt */
+  transition: max-height .18s ease;  /* sanfte Höhe-Transition */
+}
+
 .sw-head{
   display:flex;
   align-items:center;
@@ -303,26 +329,10 @@ body{
 #sw.is-paused{ opacity: .9; }
 #sw.is-paused .time-large{ text-decoration: underline dotted rgba(255,255,255,.35); }
 /* ===== Stopwatch: Toggle & Kompaktmodus ===== */
-.sw-toggle{
-  appearance:none;
-  border:1px solid rgba(255,255,255,.22);
-  background: rgba(255,255,255,.08);
-  color: var(--txt);
-  border-radius:10px;
-  padding:4px 10px;
-  font-weight:800;
-  line-height:1;
-  cursor:pointer;
-  margin-left:6px;
-}
+
 .sw-toggle:active{ transform: translateY(1px); }
 
 /* Kompaktansicht: nur Titel, Zeit & Status-Badge sichtbar */
-#sw.is-collapsed{
-  padding:10px 14px;
-}
-#sw.is-collapsed .sw-body{ display:none; }
-#sw.is-collapsed #sw-plan-badge{ display:none; }
 #sw.is-collapsed .sw-actions{ display:none; }
 #sw.is-collapsed #sw-hint{ display:none; }
 #sw.is-collapsed .sw-time-inline{ display:inline; }
@@ -331,10 +341,6 @@ body{
 #sw:not(.is-collapsed) .sw-time-inline{ display:none; } /* Inline-Zeit ausblenden */
 #sw:not(.is-collapsed) .sw-body{ display:grid; gap:12px; } /* Body zeigen */
 #sw:not(.is-collapsed) #sw-plan-badge{ display:inline-block; } /* Plan-Badge im Header wie vorher */
-/* Kopf in Kompaktansicht etwas dichter */
-#sw.is-collapsed .sw-head{
-  gap:8px;
-}
 
 .sw-time-inline{
   font-variant-numeric: tabular-nums;
@@ -405,10 +411,12 @@ body{
 
 /* ===== Mobile: feste Seite, Scroll NUR in den Boxen ===== */
 @media (max-width: 768px){
-  html, body{
-    height: 100dvh;
-    overflow: hidden; /* Seite selbst scrollt nicht */
-  }
+html, body{
+  height: auto;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  overflow-y: auto; /* Seite darf scrollen */
+}
 
   .view{
     /* Höhe nur innerhalb des sichtbaren Bereichs (Header+Footer ~120px) */
@@ -417,35 +425,57 @@ body{
     overflow: hidden; /* keine Seitenscrollbars */
   }
 
-  .section{
-    grid-template-columns: 1fr; /* einspaltig */
-    height: 100%;
-    min-height: 0; /* wichtig für flex/overflow in Kindern */
-  }
+  /* Override: In Heute & Kalender darf die gesamte View scrollen */
+body.route-heute .view,
+body.route-kalender .view{
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.section{
+  grid-template-columns: 1fr; /* einspaltig */
+  height: auto;               /* ← NICHT auf 100% fixieren */
+  min-height: 100%;           /* darf mindestens View-Höhe erreichen */
+}
+
+/* Default: NICHT strecken – verhindert "leere" große Karte bei Ruhetag */
+body.route-heute .section{
+  grid-template-rows: auto auto auto;
+}
 
   /* Die großen Karten werden zu flex-Containern,
      der eigentliche Inhalt darin wird scrollfähig gemacht */
   .card--big{
     display: flex;
     flex-direction: column;
-    height: 100%;
-    max-height: 100%;
+    height: auto;
+    max-height: none;
     min-height: 0; /* erlaubt dem inneren Scrollbereich, zu schrumpfen */
   }
 
-  /* 👉 Heute: große Karte soll bis zur Bottom-Bar reichen, View scrollt */
+/* Standard: Karte wächst nur nach Inhalt */
 body.route-heute .card--big{
-  height: calc(100dvh - 120px);  /* Header+Footer/Topbar abziehen */
-  max-height: calc(100dvh - 120px);
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+  min-height: 0;
+  max-height: none;
 }
+
+/* Füller NUR, wenn JS .card--fill setzt (Stoppuhr offen) */
+body.route-heute .card--big.card--fill{
+  flex: 1 1 auto;
+  max-height: calc(100dvh - 120px - (76px + var(--safe-bottom)));
+}
+
+
 
 body.route-heute .card--big .today-body{
-  overflow: auto; /* Inhalt kann innerhalb scrollen */
+  /* nur scrollen, wenn die Karte ihre max-Höhe erreicht */
+  overflow: auto;
   min-height: 0;
+  max-height: inherit;
 }
-
-
-
   
   /* Typische Inhaltscontainer in den großen Karten, die lang werden können */
   .card--big .today-body,
@@ -467,86 +497,15 @@ body.route-heute .view{
   overflow: auto;
   -webkit-overflow-scrolling: touch;
 }
-
+/* Nur strecken, wenn die große Karte bewusst füllen soll (z. B. Stoppuhr offen) */
+body.route-heute .section:has(.card--big.card--fill){
+  grid-template-rows: auto 1fr auto;
 }
 
-
-/* ===== Mobile 9-Punkte-Menü ===== */
-.menu-btn{ display:none; }
-
-.menu-pop{
-  position: absolute;
-  top: 56px;               /* unter der Topbar */
-  right: 14px;
-  min-width: 180px;
-  padding: 10px;
-  border-radius: 12px;
-  background: rgba(0,0,0,.65);
-  border: 1px solid rgba(255,255,255,.18);
-  backdrop-filter: blur(10px) saturate(140%);
-  box-shadow: var(--shadow);
-  opacity: 0;
-  transform: translateY(-6px);
-  pointer-events: none;
-  transition: opacity .15s ease, transform .15s ease;
-  z-index: 20;
+/* Fallback für Browser ohne :has() – wird per JS-Klasse gesetzt (siehe app.js) */
+body.route-heute .section.section--fill{
+  grid-template-rows: auto 1fr auto;
 }
-.menu-pop.active{
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
-}
-.menu-item{
-  display:block;
-  padding:10px 12px;
-  border-radius:10px;
-  color: var(--txt);
-  text-decoration:none;
-}
-.menu-item:hover{
-  background: rgba(255,255,255,.08);
-  border: 1px solid rgba(255,255,255,.18);
-}
-
-/* 9 Punkte Icon */
-.menu-btn{
-  position: relative;
-  margin-left: 6px;
-  background: rgba(255,255,255,.08);
-  border:1px solid rgba(255,255,255,.22);
-  color: var(--txt);
-  border-radius:12px;
-  padding: 10px 12px;
-  cursor: pointer;
-  line-height: 0;
-}
-.menu-btn:active{ transform: translateY(1px); }
-
-.menu-btn .dots{
-  display: grid;
-  grid-template-columns: repeat(3, 4px);
-  grid-template-rows: repeat(3, 4px);
-  gap: 4px;
-  width: 16px;
-  height: 16px;
-  place-items: center;
-}
-
-.menu-btn .dots::before{
-  content:"";
-  width:4px;
-  height:4px;
-  border-radius:50%;
-  background: currentColor;
-  box-shadow:
-    8px 0 currentColor,
-    16px 0 currentColor,
-    0 8px currentColor,
-    8px 8px currentColor,
-    16px 8px currentColor,
-    0 16px currentColor,
-    8px 16px currentColor,
-    16px 16px currentColor;
 }
 
 /* Konfig: leerer Zustand ohne Box */
@@ -558,6 +517,7 @@ body.route-heute .view{
 
 /* Sichtbarkeit & Layout mobil/desktop */
 @media (max-width: 768px){
+
   /* Topbar wird zur Bottom-Bar */
   .topbar{
     position: fixed;
@@ -616,9 +576,6 @@ body.route-heute .view{
     width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); border:0;
   }
 
-  /* 9-Punkte-Menü ausdrücklich verbergen (falls noch im DOM) */
-  .menu-btn, .menu-pop{ display:none !important; }
-
   /* Platz für Bottom-Bar schaffen */
    .view{
     padding-bottom: calc(76px + var(--safe-bottom));  /* Platz für Nav + Home-Indicator */
@@ -631,7 +588,6 @@ body.route-heute .view{
   .footer{ display:none; }
 }
 @media (min-width: 769px){
-  .menu-pop{ display:none; } 
     .nav-link{
     display:inline-flex;
     align-items:center;
@@ -654,11 +610,6 @@ body.route-heute .view{
 }
 .weight-input{
   text-align: right;
-}
-.weight-suffix{
-  opacity:.8;
-  margin-left:6px;
-  font-size:.9rem;
 }
 
 /* === Stoppuhr: Gewichte-Liste === */
@@ -767,16 +718,13 @@ body.route-heute .view{
 }
 
 
-/* === Route-Transition (Fade) für den #view-Container === */
+/* === Route-Transition (Desktop: Fade) === */
 .view {
   will-change: opacity, transform;
 }
 
 /* Exit (aktueller Inhalt verschwindet) */
-.view.route-exit {
-  opacity: 1;
-  transform: none;
-}
+.view.route-exit { opacity: 1; transform: none; }
 .view.route-exit-active {
   opacity: 0;
   transform: translateY(6px);
@@ -784,10 +732,7 @@ body.route-heute .view{
 }
 
 /* Enter (neuer Inhalt erscheint) */
-.view.route-enter {
-  opacity: 0;
-  transform: translateY(6px);
-}
+.view.route-enter   { opacity: 0; transform: translateY(6px); }
 .view.route-enter-active {
   opacity: 1;
   transform: none;
@@ -802,6 +747,52 @@ body.route-heute .view{
     transform: none;
   }
 }
+
+/* === Mobile: horizontales Sliding mit Richtung (rechts -> links) === */
+@media (max-width: 768px){
+  /* EXIT: aktuelle Seite fährt je nach Richtung seitlich raus */
+  .view.route-exit.dir-forward   { opacity: 1; transform: none; }
+.view.route-exit-active.dir-forward {
+  opacity: 0.92;
+  transform: translate3d(-32px, 0, 0);
+  transition: transform .16s cubic-bezier(.22,.9,.26,1), opacity .16s linear;
+}
+
+
+  .view.route-exit.dir-backward  { opacity: 1; transform: none; }
+.view.route-exit-active.dir-backward {
+  opacity: 0.92;
+  transform: translate3d(32px, 0, 0);
+  transition: transform .16s cubic-bezier(.22,.9,.26,1), opacity .16s linear;
+}
+
+
+  /* ENTER: neue Seite kommt je nach Richtung seitlich rein */
+.view.route-enter.dir-forward {
+  opacity: 0;
+  transform: translate3d(32px, 0, 0);
+}
+
+.view.route-enter-active.dir-forward {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  transition: transform .18s cubic-bezier(.22,.9,.26,1), opacity .18s linear;
+}
+
+
+.view.route-enter.dir-backward {
+  opacity: 0;
+  transform: translate3d(-32px, 0, 0);
+}
+
+.view.route-enter-active.dir-backward {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  transition: transform .18s cubic-bezier(.22,.9,.26,1), opacity .18s linear;
+}
+
+}
+
 
 /* === Nav Drag/Scrub Feedback === */
 .nav .nav-link.hover{
@@ -857,5 +848,736 @@ html, body{
 /* Safari/iOS: keine Text-Autovergrößerung */
 html { -webkit-text-size-adjust: 100%; }
 
+/* === Stoppuhr: Status-Badge Farben === */
+#sw-state-badge.running {
+  background: rgba(34, 197, 94, .2);   /* Grün-Hintergrund */
+  border-color: rgba(34, 197, 94, .6);
+  color: #4ade80; /* Tailwind green-400 */
+}
+
+#sw-state-badge.paused {
+  background: rgba(251, 191, 36, .2);  /* Orange-Hintergrund */
+  border-color: rgba(251, 191, 36, .6);
+  color: #fbbf24; /* Tailwind amber-400 */
+}
+
+#sw-state-badge.results {
+  background: rgba(59, 130, 246, .2);   /* Blau-Hintergrund */
+  border-color: rgba(59, 130, 246, .6); /* Rahmen in Blau */
+  color: #93c5fd;                       /* Text Blau-300/400 */
+}
+
+/* ===== Modals (Onboarding) ===== */
+.modal[hidden]{ display:none !important; }
+.modal{
+  position: fixed; inset: 0; z-index: 50;
+  display:grid; place-items:center;
+}
+.modal-backdrop{
+  position:absolute; inset:0;
+  background: rgba(0,0,0,.55);
+  backdrop-filter: blur(4px) saturate(140%);
+}
+.modal-card{
+  position:relative;
+  width: min(520px, 92vw);
+  background: color-mix(in oklab, var(--glass-bg) 100%, transparent);
+  border: 1px solid color-mix(in oklab, var(--glass-brd) 100%, transparent);
+  box-shadow: var(--shadow);
+  border-radius: 14px;
+  padding: 18px;
+}
+.modal-card .field + .field{ margin-top: 10px; }
+.modal-card input{
+  width:100%; padding:12px 14px; border-radius:12px;
+  border:1px solid rgba(255,255,255,.2);
+  background: rgba(0,0,0,.2); color: var(--txt);
+}
+
+/* ===== Startseiten-Gruß oberhalb der „Heute“-Karte ===== */
+.home-greeting{
+  font-size: clamp(28px, 3.2vw, 38px);
+  font-family: "Calibri Light", Calibri, "Segoe UI", sans-serif;
+  letter-spacing: .3px;
+  color: white;
+  opacity: .9;
+  text-shadow: none;
+  margin: 0 2px 0; /* <-- kein zusätzlicher Abstand oben/unten */
+  line-height: 1.2;
+}
+
+.today-meta{
+  display: grid;
+  gap: 4px;          /* etwas enger */
+  margin: 0 2px 2px; /* kein Extra-Abstand nach oben */
+}
+
+/* Optik der Stoppuhr-Karte etwas dichter */
+.stopwatch { padding-top: 8px; }
+#sw.is-collapsed { max-height: 60px; }
+
+/* Meta/Plan: etwas mehr Luft unter dem Pill */
+.today-meta .pill { margin-bottom: 2px; }
+
+/* „Heute“-Karte insgesamt minimal dichter */
+.card--big .today-body { gap: 14px; }
+
+/* Badge etwas kompakter, damit in einer Zeile mit Zeit bleibt */
+#sw-state-badge { padding: 4px 8px; }
+
+/* =========================================================
+   Gradient Glow Theme (no glass, high contrast, neon accents)
+   Aktiv: <body class="theme-gradient-glow">
+   ---------------------------------------------------------
+   - ersetzt Glas/Blur durch matte, dunkle Panels
+   - fügt leuchtende Verläufe & Glow-Akzente hinzu
+   - hält Layout & Komponentenlogik unverändert
+   ========================================================= */
+
+.theme-gradient-glow {
+  /* Basis-Farben */
+  --txt: #eef2f6;
+  --muted: #a9b3c1;
+
+  /* Dunkler Untergrund + Panel-Farben (ohne Glas) */
+  --bg-1: #070b11;         /* Hintergrund dunkel */
+  --bg-2: #0b1117;         /* leichte Nuance */
+  --panel: #0f1621;        /* Karten/Container */
+  --panel-brd: #1e2a3a;    /* dezenter Rand */
+
+  /* Akzent-Verlauf (Gradient Glow) – anpassbar */
+  --accent-1: #22d3ee;     /* cyan */
+  --accent-2: #8b5cf6;     /* violet */
+  --accent-3: #f472b6;     /* pink (optional für Hover) */
+
+  /* Effekte */
+  --shadow-strong: 0 20px 60px rgba(0,0,0,.45);
+  --glow: 0 0 24px rgba(34,211,238,.25), 0 0 48px rgba(139,92,246,.18);
+}
+
+/* --- Hintergrund: dunkler Grund + weiche Verlaufslights --- */
+.theme-gradient-glow body {
+  background:
+    radial-gradient(1200px 800px at 15% 10%, rgba(34,211,238,.14), transparent 60%),
+    radial-gradient(1200px 800px at 85% 90%, rgba(139,92,246,.14), transparent 60%),
+    linear-gradient(180deg, var(--bg-1), var(--bg-2));
+  background-attachment: fixed;
+  backdrop-filter: none;              /* kein Sättigungs/Blur-Boost */
+  color: var(--txt);
+}
+
+/* vorhandene großen Blur-Spots DEAKTIVIEREN (aus dem alten Glaslook) */
+.theme-gradient-glow #app::before,
+.theme-gradient-glow #app::after { display: none !important; }
+
+/* --- Karten / Container: matt, ohne Glas, mit feinem Rand --- */
+.theme-gradient-glow .glass {
+  background: var(--panel) !important;
+  border: 1px solid var(--panel-brd) !important;
+  box-shadow: var(--shadow-strong) !important;
+  backdrop-filter: none !important;
+}
+
+.theme-gradient-glow .card { padding: 18px; border-radius: 12px; }
+
+/* Listen-Items, Badges etc. vom Glas lösen */
+.theme-gradient-glow .list li,
+.theme-gradient-glow .settings-block,
+.theme-gradient-glow .stat {
+  background: #111a27 !important;
+  border: 1px solid rgba(255,255,255,.06) !important;
+}
+
+/* Trennlinien etwas klarer */
+.theme-gradient-glow .divider {
+  background: rgba(255,255,255,.12);
+}
+
+/* Neuer blauer 3D-Button mit "Pop"-Animation beim Klicken */
+.btn.primary {
+  background: linear-gradient(180deg, #3da3ff 0%, #1e40af 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 14px;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(30, 64, 175, .35);
+  transition: transform 0.15s ease, box-shadow 0.25s ease, background 0.25s ease;
+  transform: scale(1);
+}
+
+/* Hover: leicht angehoben */
+.btn.primary:hover {
+  background: linear-gradient(180deg, #60a5fa 0%, #1e3a8a 100%);
+  box-shadow: 0 6px 16px rgba(30, 64, 175, .45);
+  transform: scale(1.04);
+}
+
+/* Klick: "Pop"-Effekt (kurz größer, dann zurück) */
+.btn.primary:active {
+  transform: scale(1.08);
+  box-shadow: 0 3px 8px rgba(30, 64, 175, .3);
+}
 
 
+.theme-gradient-glow .btn.subtle {
+  background: #111a27;
+  border: 1px solid rgba(255,255,255,.14);
+  color: var(--txt);
+}
+.theme-gradient-glow .btn.ghost {
+  background: transparent;
+  border: 1px dashed rgba(255,255,255,.28);
+  color: var(--txt);
+}
+
+/* Danger-Buttons bleiben klar, ohne Glas */
+.theme-gradient-glow .btn.danger {
+  background: #ef4444;
+  color: #0b0b0b;
+  border: none;
+}
+
+/* --- Top/Bottom-Bar: matt + leichte Akzentkante --- */
+.theme-gradient-glow .topbar {
+  background: rgba(9,12,18,.72);
+  border-color: rgba(255,255,255,.06);
+  backdrop-filter: none;
+}
+.theme-gradient-glow .footer {
+  background: rgba(9,12,18,.72);
+  border-top: 1px solid rgba(255,255,255,.06);
+}
+
+/* --- Nav-Spot: vom „Glas-Bump“ zu Neon-Verlauf --- */
+.theme-gradient-glow .nav-spot {
+  height: 40px;
+  border-radius: 14px;
+  background: linear-gradient(90deg, var(--accent-1), var(--accent-2)) !important;
+  box-shadow: var(--glow), 0 12px 28px rgba(0,0,0,.4);
+  backdrop-filter: none;
+}
+.theme-gradient-glow .nav-spot::before { display: none; } /* Bump entfernen */
+.theme-gradient-glow .nav .nav-link.active { background: transparent; border-color: transparent; }
+
+/* Mobile: höhere Spot-Höhe beibehalten */
+@media (max-width: 768px){
+  .theme-gradient-glow .nav-spot { height: 56px; }
+}
+
+/* --- Kalender: Trainingstage als matte, leicht leuchtende Zellen --- */
+.theme-gradient-glow .day {
+  background: #111a27;
+  border: 1px solid rgba(255,255,255,.10);
+}
+.theme-gradient-glow .day.has-training {
+  background:
+    linear-gradient(135deg,
+      color-mix(in oklab, var(--accent-1) 24%, transparent),
+      color-mix(in oklab, var(--accent-2) 24%, transparent));
+  border-color: rgba(255,255,255,.22);
+  box-shadow: 0 0 0 1px rgba(255,255,255,.06) inset;
+}
+.theme-gradient-glow .day.today {
+  border-color: rgba(110,231,183,.5);
+  box-shadow: 0 0 0 2px rgba(110,231,183,.25) inset;
+}
+
+/* --- Formulare / Inputs: klare Felder, ohne Blur --- */
+.theme-gradient-glow .field input,
+.theme-gradient-glow .field select,
+.theme-gradient-glow .sw-weights .weight-input,
+.theme-gradient-glow .gear-input,
+.theme-gradient-glow .field textarea {
+  background: #0c121b !important;
+  border: 1px solid #1b2736 !important;
+  color: var(--txt) !important;
+  box-shadow: none !important;
+}
+.theme-gradient-glow .sw-weights .weight-input {
+  border: 0 !important;
+  border-bottom: 1px solid rgba(255,255,255,.22) !important;
+  background: transparent !important;
+}
+
+/* --- Stoppuhr-Badge-Farben bleiben, aber auf dunklem Panel --- */
+.theme-gradient-glow #sw-state-badge.running {
+  background: rgba(34,197,94,.16);
+  border-color: rgba(34,197,94,.5);
+  color: #86efac;
+}
+.theme-gradient-glow #sw-state-badge.paused {
+  background: rgba(251,191,36,.14);
+  border-color: rgba(251,191,36,.45);
+  color: #facc15;
+}
+.theme-gradient-glow #sw-state-badge.results {
+  background: rgba(59,130,246,.14);
+  border-color: rgba(59,130,246,.45);
+  color: #93c5fd;
+}
+
+/* --- Kleines Extra: aktive Primary-Focus-States mit leuchtender Outline --- */
+.theme-gradient-glow .btn.primary:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--accent-1) 60%, transparent);
+  outline-offset: 2px;
+  box-shadow: var(--glow);
+}
+
+/* Motion-Respect: keine animierten Farbflächen in Reduce-Motion */
+@media (prefers-reduced-motion: reduce){
+  .theme-gradient-glow * { transition: none !important; }
+}
+
+/* === Mobile: Abstand zwischen "Hallo <Name>" und Datum reduzieren === */
+@media (max-width: 768px) {
+  .home-greeting {
+    margin-bottom: 0;       /* entferne unteren Abstand */
+    gap: 0;
+  }
+  .today-meta {
+    margin-top: 0;
+    gap: 0;          /* schiebt Datum näher an Begrüßung */
+  }
+
+  /* GPU/Layer-Hinweise für mobile Route-Transitions */
+.view{
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  contain: paint;
+  backface-visibility: hidden;
+}
+
+}
+
+/* ===== Low-FX-Modus während Route-Animation ===== */
+body.animating #app::before,
+body.animating #app::after{
+  display: none !important;
+}
+
+body.animating .glass,
+body.animating .settings-block,
+body.animating .stat,
+body.animating .list li{
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  filter: none !important;
+}
+
+body.animating .topbar,
+body.animating .footer{
+  backdrop-filter: none !important;
+}
+
+/* Spotlight-Animation vereinfachen, damit sie nicht „gegen“ die Route fährt */
+body.animating .nav-spot{
+  transition:
+    transform .12s ease,
+    width .12s ease,
+    height .12s ease !important;
+}
+
+/* === Mobile Startseite: oben ~1/3 Blau, unten Weiß (scrollt mit & exakte Linie) === */
+@media (max-width: 768px){
+  body.route-heute,
+  body.theme-gradient-glow.route-heute {
+    /* Trennlinie exakt bei --home-split (33vh) */
+    background: linear-gradient(
+      to bottom,
+      #0e3264 0,
+      #0c2e5e var(--home-split),
+      #dfdcdc var(--home-split),  /* gleicher Stop → harte Kante */
+      #d4d2d2 100%
+    ) !important;
+    background-attachment: local !important;   /* scrollt mit */
+    background-repeat: no-repeat;
+    background-size: 100% auto;
+    backdrop-filter: none !important;
+    overflow-y: auto;
+  }
+
+  /* Lichter ausblenden */
+  body.route-heute #app::before,
+  body.route-heute #app::after {
+    display: none !important;
+  }
+
+  /* Seite scrollt, View hält sich zurück */
+  body.route-heute .view {
+    overflow-y: visible !important;
+    height: auto !important;
+    min-height: 100dvh;
+  }
+}
+
+
+
+/* === Mobile Startseite: Plan als schwebende, breitere Karte auf der Blau/Weiß-Linie === */
+@media (max-width: 768px){
+  :root {
+    --home-split: 33vh;         
+    --plan-card-offset: -70px;  
+  }
+
+  body.route-heute #today-plan-pill{
+    position: fixed;
+    top: var(--home-split);
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 15;
+
+    /* Größere, auffälligere Karte */
+    background: #ffffff !important;
+    color: #0b1117 !important;
+    border: 1px solid rgba(0,0,0,.08);
+    border-radius: 20px;
+    padding: 18px 28px;          /* mehr Innenabstand */
+    min-width: 80vw;             /* breiter: 80% der Viewport-Breite */
+    max-width: 92vw;             /* aber nicht ganz randlos */
+    text-align: center;
+    font-weight: 700;
+    font-size: 1.1rem;
+    box-shadow: 0 10px 28px rgba(0,0,0,.25);
+  }
+
+  /* Text über der Karte */
+  body.route-heute #plan-hint{
+    text-align: center;
+    margin-top: 8px;
+    margin-bottom: 12px;
+  }
+
+  /* Restlicher Inhalt rutscht tiefer */
+  body.route-heute .card--big{
+    margin-top: calc(var(--home-split) + var(--plan-card-offset));   
+  }
+}
+
+/* === Mobile: Heute-Startseite – nur Streak zeigen, rechtsbündig === */
+@media (max-width: 768px){
+  /* In der Heute-Ansicht die Stats auf 1 Spalte und nach rechts bündig */
+  body.route-heute .stats{
+    grid-template-columns: 1fr;
+    justify-items: end;
+  }
+
+  /* "Erfolg · 7 Tage" und "Erfolg · 30 Tage" ausblenden */
+  body.route-heute .stat:has(#stat-7d),
+  body.route-heute .stat:has(#stat-30d){
+    display: none !important;
+  }
+}
+
+/* === Mobile Startseite: nur leere schwarze Karte unter "Ruhetag / frei" ausblenden === */
+@media (max-width: 768px){
+  /* Nur ausblenden, wenn Ruhetag aktiv ist */
+  body.route-heute.is-rest .glass.card.card--big {
+    display: none !important;
+  }
+}
+
+
+/* === Mobile: Abstand + weiße Karte für "Nächste Termine" (fix für theme-gradient-glow) === */
+@media (max-width: 768px){
+
+  /* Abstand */
+  body.route-heute:not(.is-rest) .card--big + .card { margin-top: -160px; }
+  body.route-heute.is-rest .stopwatch-standalone + .card { margin-top: 160px; }
+
+  /* Karte selbst auf weiß */
+  .theme-gradient-glow body.route-heute .stopwatch-standalone + .card,
+  .theme-gradient-glow body.route-heute .card--big + .card {
+    background: #ffffff !important;
+    border: 1px solid rgba(0,0,0,.08) !important;
+    color: #0b1117 !important;
+    box-shadow: 0 10px 28px rgba(0,0,0,.15);
+  }
+
+  /* Texte */
+  .theme-gradient-glow body.route-heute .stopwatch-standalone + .card h2,
+  .theme-gradient-glow body.route-heute .stopwatch-standalone + .card .muted,
+  .theme-gradient-glow body.route-heute .stopwatch-standalone + .card span,
+  .theme-gradient-glow body.route-heute .card--big + .card h2,
+  .theme-gradient-glow body.route-heute .card--big + .card .muted {
+    color: #0b1117 !important;
+    opacity: .9;
+  }
+
+  /* Listen-Einträge hell (überstimmt die Theme-Regel mit !important) */
+  .theme-gradient-glow body.route-heute .stopwatch-standalone + .card .list li,
+  .theme-gradient-glow body.route-heute .card--big + .card .list li {
+    background: #f7f9fc !important;
+    border: 1px solid rgba(0,0,0,.06) !important;
+    color: #0b1117 !important;
+  }
+
+  /* Badges hell */
+  .theme-gradient-glow body.route-heute .stopwatch-standalone + .card .badge,
+  .theme-gradient-glow body.route-heute .card--big + .card .badge {
+    background: #eef2f7 !important;
+    border: 1px solid rgba(0,0,0,.12) !important;
+    color: #0b1117 !important;
+  }
+
+  /* Sicherheit: Pill über allem */
+  body.route-heute.is-rest #today-plan-pill { z-index: 100; }
+}
+
+
+
+
+/* ===== Stoppuhr als Standalone unter dem weißen Bereich (Mobil) ===== */
+.stopwatch-standalone{
+  margin-top: 8px;           /* Desktop/Fallback */
+}
+
+@media (max-width: 768px){
+  body.route-heute .stopwatch-standalone{
+    /* unter der Blau/Weiß-Kante etwas Luft und horizontale Paddings */
+    margin-top: 10px;
+    padding: 0 16px 12px;
+    color: #0b1117; /* dunkler Text auf weißem Bereich */
+  }
+
+  body.route-heute .stopwatch-standalone .muted{
+    color: #334155;
+  }
+
+  body.route-heute .stopwatch-standalone .btn.subtle{
+    background: #f1f5f9;
+    border-color: #e2e8f0;
+    color: #0b1117;
+  }
+
+  body.route-heute .stopwatch-standalone .sw-weights .weight-input{
+    color: #0b1117 !important;
+    border-bottom-color: #0b1117 !important;
+  }
+}
+
+/* Buttons oberhalb der Stoppuhr etwas einrücken */
+.actions--top { 
+  margin: 6px 2px 8px; 
+  display: flex; 
+  gap: 10px; 
+  flex-wrap: wrap; 
+}
+
+/* Mobile: wenn keine .card--big mehr vorhanden ist,
+   bekommt die Folgekarte ("Nächste Termine") weiter unten
+   die gleiche weiße Optik & den Abstand wie zuvor */
+@media (max-width: 768px){
+  body.route-heute .stopwatch-standalone + .card{
+    margin-top: 24px;
+    background: #ffffff !important;
+    border: 1px solid rgba(0,0,0,.08) !important;
+    color: #0b1117 !important;
+    box-shadow: 0 10px 28px rgba(0,0,0,.15);
+  }
+
+   body.route-heute .stopwatch-standalone:has(#sw) + .card{
+    margin-top: 60px; /* dein bisheriger Wert; passe nach Geschmack an */
+  }
+  body.route-heute .stopwatch-standalone + .card h2,
+  body.route-heute .stopwatch-standalone + .card .muted{
+    color: #0b1117; opacity: .9;
+  }
+  body.route-heute .stopwatch-standalone + .card .list li{
+    background: #f7f9fc; 
+    border: 1px solid rgba(0,0,0,.06); 
+    color: #0b1117;
+  }
+  body.route-heute .stopwatch-standalone + .card .badge{
+    background: #eef2f7; 
+    border: 1px solid rgba(0,0,0,.12); 
+    color: #0b1117;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Abstand der Buttons direkt unter der blauen/weißen Trennkante */
+  .actions--top {
+    margin-top: 240px; /* exakt unter dem blauen Bereich */
+    margin-bottom: 12px;
+    padding: 0 16px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  /* Buttons dürfen etwas größer & breiter sein */
+  .actions--top .btn {
+    flex: 1 1 auto;
+    text-align: center;
+  }
+
+    /* Am Ruhetag: Buttons komplett ausblenden, Lücke entfernen */
+  body.route-heute.is-rest .actions--top {
+    display: none;
+    margin: 0;
+    padding: 0;
+  }
+
+    /* Folgekarte ("Nächste Termine") etwas näher heranholen */
+  body.route-heute.is-rest .glass.card.card--big + .card {
+    margin-top: 60px; /* vorher war -200px – je nach Geschmack */
+  }
+}
+
+@keyframes btn-pop {
+  0%   { transform: scale(1); }
+  60%  { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
+/* generische Klasse, die wir kurzzeitig setzen */
+.btn.is-popping {
+  animation: btn-pop 180ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* === FIX: Pill überlappt "Nächste Termine" am Ruhetag (mobil) === */
+@media (max-width: 768px){
+  /* Genug Abstand unter der schwebenden Pill */
+  body.route-heute.is-rest .stopwatch-standalone + .card{
+    margin-top: 160px !important; /* ggf. 140–200px feinjustieren */
+  }
+
+  /* Sicherheit: Pill bleibt darüber */
+  body.route-heute.is-rest #today-plan-pill{
+    z-index: 100;
+  }
+
+  /* Falls irgendwo noch ein alter Negativabstand greift, neutralisieren */
+  body.route-heute.is-rest .glass.card.card--big + .card{
+    margin-top: 0 !important;
+  }
+}
+
+/* === Mobile: "Nächste Termine" Liste hell machen (über ID) === */
+@media (max-width: 768px){
+  /* Listeneinträge */
+  .theme-gradient-glow #upcoming-list li{
+    background: #f5f7fa !important;
+    border: 1px solid rgba(0,0,0,.06) !important;
+    color: #0b1117 !important;
+  }
+
+  /* Badge in der Liste */
+  .theme-gradient-glow #upcoming-list .badge{
+    background: #eef2f7 !important;
+    border: 1px solid rgba(0,0,0,.12) !important;
+    color: #0b1117 !important;
+  }
+}
+
+/* =========================================================
+   NAV: Heroicons sauber stapeln + Toggle Outline ↔ Solid
+   ========================================================= */
+.nav .icon{
+  position: relative;
+  display: inline-block;
+  width: 28px;     /* einheitliche Icongröße */
+  height: 28px;
+  line-height: 0;
+}
+
+/* Beide Varianten exakt übereinander legen */
+.nav .icon .icon-outline,
+.nav .icon .icon-filled{
+  position: absolute;
+  inset: 0;
+  display: block;
+  line-height: 0;
+}
+
+/* SVG-Grundregeln */
+.nav .icon svg{
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Outline-Variante optisch angleichen (Heroicons Outline) */
+.nav .icon .icon-outline svg{
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;        /* 1.5–2.0 ist sweet spot */
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Solid-Variante (Heroicons Solid) */
+.nav .icon .icon-filled svg{
+  fill: currentColor;
+}
+
+/* Sichtbarkeit per Opacity (verhindert Layout-Jumps) */
+.nav .icon .icon-outline{ opacity: 1; }
+.nav .icon .icon-filled{  opacity: 0; pointer-events: none; }
+
+/* Aktiver Tab zeigt NUR das gefüllte Icon */
+.nav-link.active .icon .icon-outline{ opacity: 0; }
+.nav-link.active .icon .icon-filled{  opacity: 1; }
+
+/* Grundfarbe der Icons/Texte (dunkel auf Weiß) */
+.nav-link{ color: #0f172a; }          /* slate-900-ish */
+.nav-link .icon{ opacity: .82; }      /* inaktiv leicht gedimmt */
+.nav-link.active .icon{ opacity: 1; } /* aktiv voll sichtbar */
+
+
+/* =========================================================
+   MOBILE NAV: Weißes Bottom-Bar-Design + klare Kante
+   ========================================================= */
+@media (max-width: 768px){
+  .topbar{
+    background: #ffffff !important;                    /* wirklich deckend */
+    border-top: 1px solid rgba(0,0,0,.06) !important;  /* feine Trennlinie */
+    border-bottom: none !important;
+    backdrop-filter: none !important;
+    box-shadow: 0 -1px 0 rgba(0,0,0,.06), 0 -8px 24px rgba(0,0,0,.06);
+  }
+
+  .nav{
+    align-items: center;
+  }
+  .nav-link{
+    color: #0e3264 !important;
+    border-color: transparent !important;
+    background: transparent !important;
+    min-width: 64px;
+    padding: 10px 12px;
+  }
+
+  /* Label bleibt unsichtbar (Screenreader nutzt aria-label) */
+  .nav-link .label{
+    position:absolute; width:1px; height:1px; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); border:0;
+  }
+
+  /* Den blauen „Spotlight“-Höcker auf weißer Bar ausblenden */
+  .nav-spot{ display: none !important; }
+
+  /* Tap-Feedback minimal */
+  .nav-link:active{ transform: translateY(1px); }
+}
+
+/* =========================================================
+   NAV ICON: sanfter Größenwechsel beim Aktivieren
+   ========================================================= */
+
+/* Standardgröße minimal kleiner halten */
+.nav .icon {
+  transform: scale(0.92);
+  transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1); /* smooth „pop“ */
+}
+
+/* Wenn aktiv → leicht größer */
+.nav-link.active .icon {
+  transform: scale(1);
+}
+
+/* Optional: beim Tippen (kurzes „Bouncen“) */
+.nav-link:active .icon {
+  transform: scale(1.08);
+  transition-duration: 0.12s;
+}
