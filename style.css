@@ -1581,3 +1581,48 @@ body.animating .nav-spot{
   transform: scale(1.08);
   transition-duration: 0.12s;
 }
+
+/* ===== Streak-Flammen-Badge ===== */
+.streak-badge{
+  position: relative;
+  width: 150px;
+  height: 150px;
+  display: none;          /* Standard: auf Desktop ausgeblendet */
+  margin-left: auto;      /* rechtsbündig im Meta-Bereich */
+  margin-top: 20px;
+}
+
+.streak-badge img{
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.streak-badge .streak-num{
+  position: absolute;
+  margin-top: 30px;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 3rem;
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0,0,0,.35);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* Optional: kleine „Pop“-Animation, wenn der Streak steigt */
+@keyframes streak-pop {
+  0%   { transform: scale(1); }
+  60%  { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+
+@media (max-width: 768px){
+  /* Die komplette Stats-Kachel ausblenden (statt nur 7d/30d) */
+  .stats { display: none !important; }
+
+  /* Flammen-Badge nur mobil anzeigen */
+  .streak-badge { display: block; }
+}
