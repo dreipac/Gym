@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="theme-color" content="#1E3766">
+  <meta name="theme-color" content="#0e3264">
   <title>GymPlan</title>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
@@ -141,6 +141,11 @@
             <div class="stat-label">Erfolg · 30 Tage</div>
           </div>
         </div>
+                  <!-- MOBIL: Flammen-Badge mit Streak-Zahl -->
+          <div class="streak-badge" id="streak-badge" aria-label="Aktueller Streak: 0 Tage">
+            <img src="icons/flamme.svg" alt="" aria-hidden="true" />
+            <span class="streak-num" id="streak-badge-num">0</span>
+          </div>
       </div>
 
     <div class="actions actions--top">
@@ -382,7 +387,6 @@
   <script src="app.js"></script>
 </body>
 </html>
-
 
 
 
