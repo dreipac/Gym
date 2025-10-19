@@ -561,6 +561,16 @@ function renderHeute(root){
   q("#stat-7d", root).textContent = successRate(7) + "%";
   q("#stat-30d", root).textContent = successRate(30) + "%";
 
+  // Flammen-Badge: Streak-Zahl setzen + aria-label aktualisieren
+  const sbNum = q("#streak-badge-num", root);
+  const sb    = q("#streak-badge", root);
+  if (sbNum) {
+    const sVal = String(calcStreak());
+    sbNum.textContent = sVal;
+    if (sb) sb.setAttribute("aria-label", `Aktueller Streak: ${sVal} Tage`);
+  }
+
+
   // Actions & Stoppuhr-Referenzen
   const btnStart = q("#btn-start", root);
   const btnDone  = q("#btn-done",  root);
@@ -926,6 +936,25 @@ swStop.onclick = () => {
       q("#stat-streak", root).textContent = String(calcStreak());
       q("#stat-7d", root).textContent = successRate(7) + "%";
       q("#stat-30d", root).textContent = successRate(30) + "%";
+
+            // Flammen-Badge auch hier aktuell halten
+      const sbNum = q("#streak-badge-num", root);
+      const sb    = q("#streak-badge", root);
+      if (sbNum) {
+        const sVal = String(calcStreak());
+        sbNum.textContent = sVal;
+        if (sb) sb.setAttribute("aria-label", `Aktueller Streak: ${sVal} Tage`);
+        // Optional: kleine Pop-Animation, wenn der Streak sich erhöht hat
+        // (Einfach: jedes Refresh kurz „poppen“ lassen – kannst du später verfeinern)
+        try {
+          sbNum.style.animation = "none";
+          // Reflow erzwingen
+          // eslint-disable-next-line no-unused-expressions
+          sbNum.offsetHeight;
+          sbNum.style.animation = "streak-pop 180ms cubic-bezier(0.34,1.56,0.64,1)";
+        } catch {}
+      }
+
     }
   };
 }
