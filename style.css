@@ -1754,3 +1754,150 @@ body.animating .nav-spot{
   /* Flammen-Badge nur mobil anzeigen */
   .streak-badge { display: block; }
 }
+
+/* =========================================================
+   BLACK MODE 
+   ========================================================= */
+
+/* Nav-Bar & allgemeine Farben (mobil) */
+@media (max-width: 768px){
+  .theme-black .topbar{
+    background: #000000 !important;
+    border-top: 1px solid #111111 !important;
+    border-bottom: none !important;
+    box-shadow: 0 -1px 0 rgba(255,255,255,.06), 0 -8px 24px rgba(0,0,0,.45);
+  }
+
+  .theme-black .nav-link{
+    color: #ffffff !important;          /* Labels & Icon-Farbe via currentColor */
+    border-color: transparent !important;
+    background: transparent !important;
+  }
+  .theme-black .nav-link .label{
+    color: #ffffff !important;
+    opacity: .9 !important;
+  }
+  .theme-black .nav .icon{ opacity: 1 !important; }
+}
+
+/* Hintergrund-Aufteilung (ersetzt Blau/Weiß durch Schwarz/„fast Schwarz“) inkl. helle Linie */
+@media (max-width: 768px){
+  body.theme-black.route-heute,
+  body.theme-black.route-kalender{
+    /* harte helle Linie an der Kante: */
+    background:
+      linear-gradient(
+        to bottom,
+        #000000 0,
+        #000000 calc(var(--home-split) - 0.5px),
+        rgba(255,255,255,.22) calc(var(--home-split) - 0.5px),
+        rgba(255,255,255,.22) calc(var(--home-split) + 0.5px),
+        #0a0a0a  calc(var(--home-split) + 0.5px),
+        #0a0a0a 100%
+      ) !important;
+    background-attachment: local !important;
+    background-repeat: no-repeat;
+    background-size: 100% auto;
+    padding-bottom: calc(76px + var(--safe-bottom) + 24px);
+  }
+
+  /* Lichter im Black Mode deaktiviert */
+  .theme-black.route-heute #app::before,
+  .theme-black.route-heute #app::after,
+  .theme-black.route-kalender #app::before,
+  .theme-black.route-kalender #app::after{
+    display: none !important;
+  }
+
+  /* View lässt Seite scrollen */
+  .theme-black.route-heute .view,
+  .theme-black.route-kalender .view{
+    overflow-y: visible !important;
+    height: auto !important;
+    min-height: 100dvh;
+  }
+}
+
+/* Karten/Elemente in den mobilen Tabs weiß darstellen */
+@media (max-width: 768px){
+  .theme-black.route-kalender .section{
+    margin-top: calc(var(--home-split) + 16px);
+    padding: 0 16px;
+  }
+
+  .theme-black.route-kalender .glass.card,
+  .theme-black.route-heute .stopwatch-standalone + .card,
+  .theme-black.route-heute .card--big + .card{
+    background: #ffffff !important;
+    border: 1px solid rgba(0,0,0,.08) !important;
+    color: #0b1117 !important;
+    box-shadow: 0 10px 28px rgba(0,0,0,.15);
+  }
+
+  .theme-black.route-kalender h1,
+  .theme-black.route-kalender h2,
+  .theme-black.route-kalender .muted,
+  .theme-black.route-kalender .calendar-head,
+  .theme-black.route-kalender span,
+  .theme-black.route-kalender label{
+    color: #0b1117 !important;
+    opacity: .9;
+  }
+
+  .theme-black #upcoming-list li,
+  .theme-black .list li,
+  .theme-black .settings-block,
+  .theme-black .stat{
+    background: #f7f9fc !important;
+    border: 1px solid rgba(0,0,0,.06) !important;
+    color: #0b1117 !important;
+  }
+  .theme-black .badge{
+    background: #eef2f7 !important;
+    border: 1px solid rgba(0,0,0,.12) !important;
+    color: #0b1117 !important;
+  }
+
+  /* Kalenderzellen: Panel hell, Trainingstage leicht akzentuiert */
+  .theme-black.route-kalender .day{
+    background: #ffffff !important;
+    border: 1px solid rgba(0,0,0,.10) !important;
+  }
+  .theme-black.route-kalender .day.has-training{
+    background:
+      linear-gradient(135deg,
+        color-mix(in oklab, #e2e8f0 24%, transparent),
+        color-mix(in oklab, #cbd5e1 24%, transparent)) !important;
+    border-color: rgba(0,0,0,.12) !important;
+    box-shadow: 0 0 0 1px rgba(0,0,0,.04) inset;
+  }
+}
+
+/* Schwebende Pill (mobil) → voll schwarz + helle Umrandung, Text weiß */
+@media (max-width: 768px){
+  .theme-black.route-heute #today-plan-pill{
+    background: #000000 !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255,255,255,.28) !important;
+    box-shadow: 0 10px 28px rgba(0,0,0,.45) !important;
+  }
+}
+
+/* Stoppuhr-Bereich (mobil) innerhalb des unteren dunklen Teils → Lesbarkeit */
+@media (max-width: 768px){
+  .theme-black.route-heute .stopwatch-standalone{
+    margin-top: 10px;
+    padding: 0 16px 12px;
+    color: #e5e7eb; /* hellgrau auf sehr dunklem Grau */
+  }
+  .theme-black .sw-weights .weight-input{
+    color: #0b1117 !important;           /* in weißen Karten weiterhin dunkel */
+    border-bottom-color: #0b1117 !important;
+  }
+}
+
+/* Mobile Labels/Icons bleiben weiß, kein Spotlight */
+@media (max-width: 768px){
+  .theme-black .nav-spot{ display: none !important; }
+  .theme-black .nav-link.active .label{ opacity: 1 !important; font-weight: 800 !important; }
+}
