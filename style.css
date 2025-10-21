@@ -718,35 +718,49 @@ body.route-heute .section.section--fill{
 }
 
 
-/* === Route-Transition (Desktop: Fade) === */
-.view {
-  will-change: opacity, transform;
+/* === Route-Transition: Horizontaler Push-Slide (alle Breakpoints) === */
+.view{
+  will-change: transform;
+  transform: translate3d(0,0,0);
+  backface-visibility: hidden;
+  contain: paint;
 }
 
-/* Exit (aktueller Inhalt verschwindet) */
-.view.route-exit { opacity: 1; transform: none; }
-.view.route-exit-active {
-  opacity: 0;
-  transform: translateY(6px);
-  transition: opacity .12s cubic-bezier(.4,0,.6,1), transform .12s cubic-bezier(.4,0,.6,1);
+/* EXIT: aktueller Inhalt wird vollständig nach links/rechts hinausgeschoben */
+.view.route-exit.dir-forward        { transform: translate3d(0,0,0); }
+.view.route-exit-active.dir-forward {
+  transform: translate3d(-100%, 0, 0);
+  transition: transform .22s cubic-bezier(.22,.9,.26,1);
 }
 
-/* Enter (neuer Inhalt erscheint) */
-.view.route-enter   { opacity: 0; transform: translateY(6px); }
-.view.route-enter-active {
-  opacity: 1;
-  transform: none;
-  transition: opacity .14s cubic-bezier(.4,0,.6,1), transform .14s cubic-bezier(.4,0,.6,1);
+.view.route-exit.dir-backward        { transform: translate3d(0,0,0); }
+.view.route-exit-active.dir-backward {
+  transform: translate3d(100%, 0, 0);
+  transition: transform .22s cubic-bezier(.22,.9,.26,1);
+}
+
+/* ENTER: neuer Inhalt kommt aus der entgegengesetzten Seite herein */
+.view.route-enter.dir-forward        { transform: translate3d(100%, 0, 0); }
+.view.route-enter-active.dir-forward {
+  transform: translate3d(0, 0, 0);
+  transition: transform .22s cubic-bezier(.22,.9,.26,1);
+}
+
+.view.route-enter.dir-backward        { transform: translate3d(-100%, 0, 0); }
+.view.route-enter-active.dir-backward {
+  transform: translate3d(0, 0, 0);
+  transition: transform .22s cubic-bezier(.22,.9,.26,1);
 }
 
 /* Weniger Bewegung respektieren */
 @media (prefers-reduced-motion: reduce){
   .view.route-exit-active,
   .view.route-enter-active {
-    transition: none;
-    transform: none;
+    transition: none !important;
+    transform: none !important;
   }
 }
+
 
 /* === Mobile: horizontales Sliding mit Richtung (rechts -> links) === */
 @media (max-width: 768px){
@@ -1177,11 +1191,12 @@ body.animating .nav-spot{
     height .12s ease !important;
 }
 
-/* === Mobile Startseite: oben ~1/3 Blau, unten Weiß (scrollt mit & exakte Linie) === */
+/* === Mobile Heute & Kalender: oben ~1/3 Blau, unten Weiß (scrollt mit, exakte Linie) === */
 @media (max-width: 768px){
   body.route-heute,
-  body.theme-gradient-glow.route-heute {
-    /* Trennlinie exakt bei --home-split (33vh) */
+  body.route-kalender,
+  body.theme-gradient-glow.route-heute,
+  body.theme-gradient-glow.route-kalender {
     background: linear-gradient(
       to bottom,
       #0e3264 0,
@@ -1194,19 +1209,87 @@ body.animating .nav-spot{
     background-size: 100% auto;
     backdrop-filter: none !important;
     overflow-y: auto;
+
+    /* Platz für fixe Bottom-Navigation */
+    padding-bottom: calc(76px + var(--safe-bottom) + 24px);
   }
 
   /* Lichter ausblenden */
   body.route-heute #app::before,
-  body.route-heute #app::after {
+  body.route-heute #app::after,
+  body.route-kalender #app::before,
+  body.route-kalender #app::after {
     display: none !important;
   }
 
   /* Seite scrollt, View hält sich zurück */
-  body.route-heute .view {
+  body.route-heute .view,
+  body.route-kalender .view {
     overflow-y: visible !important;
     height: auto !important;
     min-height: 100dvh;
+  }
+}
+
+/* === Mobile: Kalender-Karten im weißen Bereich wie auf Startseite === */
+@media (max-width: 768px){
+  /* Startpunkt der Inhalte unterhalb der Blau/Weiß-Kante */
+  body.route-kalender .section{
+    margin-top: calc(var(--home-split) + 16px);
+    padding: 0 16px;
+  }
+
+  /* Beide Kalender-Karten hell/weiß darstellen */
+  body.route-kalender .glass.card{
+    background: #ffffff !important;
+    border: 1px solid rgba(0,0,0,.08) !important;
+    color: #0b1117 !important;
+    box-shadow: 0 10px 28px rgba(0,0,0,.15);
+  }
+
+  /* Typografie in den Karten */
+  body.route-kalender h1,
+  body.route-kalender h2,
+  body.route-kalender .muted,
+  body.route-kalender .calendar-head,
+  body.route-kalender span,
+  body.route-kalender label{
+    color: #0b1117 !important;
+    opacity: .9;
+  }
+
+  /* Listen-/Badge-Optik analog zu „Nächste Termine“ auf Start */
+  body.route-kalender .list li{
+    background: #f7f9fc !important;
+    border: 1px solid rgba(0,0,0,.06) !important;
+    color: #0b1117 !important;
+  }
+  body.route-kalender .badge{
+    background: #eef2f7 !important;
+    border: 1px solid rgba(0,0,0,.12) !important;
+    color: #0b1117 !important;
+  }
+
+  /* Kalenderzell-Panel bleibt hell, Trainings-Tage heben sich weiterhin ab */
+  body.route-kalender .day{
+    background: #ffffff !important;
+    border: 1px solid rgba(0,0,0,.10) !important;
+  }
+  body.route-kalender .day.has-training{
+    background:
+      linear-gradient(135deg,
+        color-mix(in oklab, #22d3ee 24%, transparent),
+        color-mix(in oklab, #8b5cf6 24%, transparent)) !important;
+    border-color: rgba(0,0,0,.12) !important;
+    box-shadow: 0 0 0 1px rgba(0,0,0,.04) inset;
+  }
+
+  /* Buttons/Inputs in Karten hell */
+  body.route-kalender .field input,
+  body.route-kalender .field select{
+    background: #f8fafc !important;
+    border: 1px solid rgba(0,0,0,.12) !important;
+    color: #0b1117 !important;
   }
 }
 
@@ -1397,7 +1480,7 @@ body.animating .nav-spot{
 @media (max-width: 768px) {
   /* Abstand der Buttons direkt unter der blauen/weißen Trennkante */
   .actions--top {
-    margin-top: 240px; /* exakt unter dem blauen Bereich */
+    margin-top: 140px; /* exakt unter dem blauen Bereich */
     margin-bottom: 12px;
     padding: 0 16px;
     display: flex;
@@ -1527,12 +1610,12 @@ body.animating .nav-spot{
 
 
 /* =========================================================
-   MOBILE NAV: Weißes Bottom-Bar-Design + klare Kante
+   MOBILE NAV: Weißes Bottom-Bar-Design + Labels sichtbar
    ========================================================= */
 @media (max-width: 768px){
   .topbar{
-    background: #ffffff !important;                    /* wirklich deckend */
-    border-top: 1px solid rgba(0,0,0,.06) !important;  /* feine Trennlinie */
+    background: #ffffff !important;
+    border-top: 1px solid rgba(0,0,0,.06) !important;
     border-bottom: none !important;
     backdrop-filter: none !important;
     box-shadow: 0 -1px 0 rgba(0,0,0,.06), 0 -8px 24px rgba(0,0,0,.06);
@@ -1540,26 +1623,71 @@ body.animating .nav-spot{
 
   .nav{
     align-items: center;
+    justify-content: space-around;
   }
+
   .nav-link{
     color: #0e3264 !important;
     border-color: transparent !important;
     background: transparent !important;
     min-width: 64px;
     padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
   }
 
-  /* Label bleibt unsichtbar (Screenreader nutzt aria-label) */
+  /* Label sichtbar unter Icon */
   .nav-link .label{
-    position:absolute; width:1px; height:1px; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); border:0;
+    position: static !important;
+    width: auto !important;
+    height: auto !important;
+    margin-top: 4px !important;
+    overflow: visible !important;
+    clip: auto !important;
+    border: 0 !important;
+    display: block;
+    font-size: 11px;
+    line-height: 1.1;
+    font-weight: 600;
+    opacity: .75;
+    text-align: center;
   }
 
-  /* Den blauen „Spotlight“-Höcker auf weißer Bar ausblenden */
+  /* Aktiver Tab: Label und Icon kräftiger */
+  .nav-link.active .label{
+    opacity: 1;
+    font-weight: 800;
+  }
+
+  .nav .icon{
+    width: 32px;   /* Icons minimal größer */
+    height: 32px;
+    transition: transform .25s ease, opacity .2s ease;
+  }
+
+  /* Aktiver Tab hebt Icon leicht hervor */
+  .nav-link.active .icon{
+    transform: scale(1.06);
+    opacity: 1;
+  }
+
+  /* Inaktive Tabs leicht blasser */
+  .nav-link:not(.active) .icon,
+  .nav-link:not(.active) .label{
+    opacity: .7;
+  }
+
+  /* Spotlight-Höcker auf Weiß ausblenden */
   .nav-spot{ display: none !important; }
 
   /* Tap-Feedback minimal */
-  .nav-link:active{ transform: translateY(1px); }
+  .nav-link:active{
+    transform: translateY(1px);
+  }
 }
+
 
 /* =========================================================
    NAV ICON: sanfter Größenwechsel beim Aktivieren
