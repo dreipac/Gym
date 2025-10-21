@@ -21,6 +21,7 @@
 /* iOS Safe-Area (Home-Indicator) */
 :root{
   --safe-bottom: env(safe-area-inset-bottom);
+  --safe-top:    env(safe-area-inset-top);
 }
 
 *{box-sizing:border-box}
@@ -1900,4 +1901,63 @@ body.animating .nav-spot{
 @media (max-width: 768px){
   .theme-black .nav-spot{ display: none !important; }
   .theme-black .nav-link.active .label{ opacity: 1 !important; font-weight: 800 !important; }
+}
+
+/* Black Mode (mobil): "Nächste Termine" wie die schwebende Pill */
+@media (max-width: 768px){
+  /* Karte direkt nach der Stoppuhr */
+  body.theme-black.route-heute .stopwatch-standalone + .card,
+  /* Karte nach der großen Heute-Karte (falls vorhanden) */
+  body.theme-black.route-heute .card--big + .card{
+    background: #000000 !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255,255,255,.28) !important;
+    box-shadow: 0 10px 28px rgba(0,0,0,.45) !important;
+  }
+
+  /* Typo in der Karte */
+  body.theme-black.route-heute .stopwatch-standalone + .card h2,
+  body.theme-black.route-heute .stopwatch-standalone + .card .muted,
+  body.theme-black.route-heute .stopwatch-standalone + .card span,
+  body.theme-black.route-heute .card--big + .card h2,
+  body.theme-black.route-heute .card--big + .card .muted,
+  body.theme-black.route-heute .card--big + .card span{
+    color: #ffffff !important;
+    opacity: .9;
+  }
+
+  /* Listeneinträge in "Nächste Termine" */
+  body.theme-black.route-heute #upcoming-list li{
+    background: rgba(255,255,255,.06) !important;
+    border: 1px solid rgba(255,255,255,.20) !important;
+    color: #ffffff !important;
+  }
+
+  /* Badges in der Liste */
+  body.theme-black.route-heute #upcoming-list .badge{
+    background: rgba(255,255,255,.10) !important;
+    border: 1px solid rgba(255,255,255,.28) !important;
+    color: #ffffff !important;
+  }
+}
+
+
+
+/* iPhone Notch/Safe-Area: oben Platz schaffen (mobil) */
+@media (max-width: 768px){
+  body.route-heute,
+  body.route-kalender,
+  body.theme-gradient-glow.route-heute,
+  body.theme-gradient-glow.route-kalender,
+  body.theme-black.route-heute,
+  body.theme-black.route-kalender{
+    padding-top: var(--safe-top) !important; /* ⬅️ verhindert Überlappung mit Uhr/Notch */
+  }
+}
+@media (max-width: 768px){
+  body.route-heute .section,
+  body.route-kalender .section{
+    /* kleiner, konstanter Puffer zusätzlich zur Safe-Area */
+    padding-top: calc(var(--safe-top) + 6px) !important;
+  }
 }
