@@ -19,6 +19,7 @@ const STORAGE_SW_UI = "gymplan.swui";
 const STORAGE_SW_DRAFT = "gymplan.swdraft";
 const STORAGE_RESULTS = "gymplan.results";
 const STORAGE_USER = "gymplan.user";
+const STORAGE_THEME = "gymplan.theme";
 const ROUTE_ORDER = ["heute", "kalender", "konfigurieren", "einstellungen"];
 
 
@@ -33,12 +34,14 @@ const state = {
   timer: loadTimer(),
   swUi: loadJSON(STORAGE_SW_UI, { collapsed: false }),
   swdrafts: loadDrafts(),
-  results: loadJSON(STORAGE_RESULTS, {}), // { [dateKey]: { type, durationMs, weights:{[deviceName]: number|null}, endedAt } }
+  results: loadJSON(STORAGE_RESULTS, {}),
+  theme: loadJSON(STORAGE_THEME, { black: false }),
+
 
 };
 
 
-/* ---------- Storage ---------- */
+/* ---------- Storage/Utilities ---------- */
 function loadJSON(key, fallback){
   try { return JSON.parse(localStorage.getItem(key)) ?? fallback; }
   catch { return fallback; }
@@ -60,6 +63,14 @@ function getDraftKey(dateKey=todayKey(), type){
 function saveResults(){
   saveJSON(STORAGE_RESULTS, state.results || {});
 }
+
+function saveTheme(){
+  saveJSON(STORAGE_THEME, state.theme || { black:false });
+}
+function applyTheme(){
+  document.body.classList.toggle("theme-black", !!(state.theme && state.theme.black));
+}
+
 
 
 function loadTemplates(){
@@ -1243,6 +1254,18 @@ function renderSettings(root){
   const fileInput = q("#file-import", root);
   const btnReset  = q("#btn-reset", root);
 
+  const blackToggle = q("#black-mode", root);
+  if (blackToggle){
+    blackToggle.checked = !!(state.theme && state.theme.black);
+    blackToggle.addEventListener("change", () => {
+      state.theme = state.theme || {};
+      state.theme.black = !!blackToggle.checked;
+      saveTheme();
+      applyTheme();
+    });
+  }
+
+
   btnExport.addEventListener("click", () => {
 const payload = {
   version: 2,
@@ -1599,4 +1622,5 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // 👉 Onboarding beim ersten Start
   initWelcome();
+  applyTheme();
 });
