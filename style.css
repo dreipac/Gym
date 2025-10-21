@@ -20,8 +20,8 @@
 
 /* iOS Safe-Area (Home-Indicator) */
 :root{
-  --safe-bottom: env(safe-area-inset-bottom);
-  --safe-top:    env(safe-area-inset-top);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-top:    env(safe-area-inset-top, 0px);
 }
 
 *{box-sizing:border-box}
@@ -522,16 +522,14 @@ body.route-heute .section.section--fill{
   /* Topbar wird zur Bottom-Bar */
   .topbar{
     position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;         /* unten andocken */
-    top: auto;
-    z-index: 20;
-    padding: 8px 12px calc(8px + var(--safe-bottom)); /* Platz für Safe-Area */
-    background: rgba(0,0,0,.55);
-    backdrop-filter: blur(10px) saturate(140%);
-    border-top: 1px solid rgba(255,255,255,.08);
+    inset: auto 0 0 0; /* unten bündig, links+rechts 0 */
+    padding: 8px 12px max(8px, calc(8px + var(--safe-bottom)));
     border-bottom: none;
+    z-index: 20;
+
+    /* iOS fix */
+    transform: translateZ(0);
+    will-change: transform;
   }
 
     /* Kleine „Luft“ unter den Tabs, damit Gesten nicht direkt an der Kante starten */
@@ -583,6 +581,14 @@ body.route-heute .section.section--fill{
     height: calc(100dvh - 120px);
     overflow: hidden;
   }
+@media (max-width: 768px){
+  body.route-heute .view,
+  body.route-kalender .view,
+  body.route-konfigurieren .view,
+  body.route-einstellungen .view{
+    padding-bottom: calc(76px + var(--safe-bottom)); /* Nav-Höhe + Safe-Area */
+  }
+}
 
 
   /* optional: Footer ausblenden, damit es unten nicht doppelt wird */
@@ -1210,9 +1216,6 @@ body.animating .nav-spot{
     background-size: 100% auto;
     backdrop-filter: none !important;
     overflow-y: auto;
-
-    /* Platz für fixe Bottom-Navigation */
-    padding-bottom: calc(76px + var(--safe-bottom) + 24px);
   }
 
   /* Lichter ausblenden */
@@ -1799,7 +1802,6 @@ body.animating .nav-spot{
     background-attachment: local !important;
     background-repeat: no-repeat;
     background-size: 100% auto;
-    padding-bottom: calc(76px + var(--safe-bottom) + 24px);
   }
 
   /* Lichter im Black Mode deaktiviert */
@@ -1952,13 +1954,6 @@ body.animating .nav-spot{
   body.theme-black.route-heute,
   body.theme-black.route-kalender{
     padding-top: var(--safe-top) !important; /* ⬅️ verhindert Überlappung mit Uhr/Notch */
-  }
-}
-@media (max-width: 768px){
-  body.route-heute .section,
-  body.route-kalender .section{
-    /* kleiner, konstanter Puffer zusätzlich zur Safe-Area */
-    padding-top: calc(var(--safe-top) + 6px) !important;
   }
 }
 
