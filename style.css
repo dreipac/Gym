@@ -3,8 +3,8 @@
   --txt: #f7f7f8;
   --muted: #cdd2d8;
 
-  --bg-deep: #071427;        /* sehr dunkles Blau (Grundfläche) */
-  --bg-deep-2: #0a1a31;      /* zweite Nuance für Vignette */
+  --bg-deep: #000000;
+  --bg-deep-2: #0a0a0a;     /* zweite Nuance für Vignette */
   --blue-core: #3da3ff;      /* helleres Blau (Kern der Lichtquelle) */
   --blue-halo: #6ec0ff;      /* Halo / äußerer Schein */
 
@@ -1961,3 +1961,4 @@ body.animating .nav-spot{
     padding-top: calc(var(--safe-top) + 6px) !important;
   }
 }
+
