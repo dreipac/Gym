@@ -523,7 +523,7 @@ body.route-heute .section.section--fill{
   .topbar{
     position: fixed;
     inset: auto 0 0 0; /* unten bündig, links+rechts 0 */
-    padding: 8px 12px max(8px, calc(8px + var(--safe-bottom)));
+    padding: 8px 12px max(6px, calc(6px + var(--safe-bottom)));
     border-bottom: none;
     z-index: 20;
 
@@ -577,7 +577,7 @@ body.route-heute .section.section--fill{
 
   /* Platz für Bottom-Bar schaffen */
    .view{
-    padding-bottom: calc(76px + var(--safe-bottom));  /* Platz für Nav + Home-Indicator */
+    padding-bottom: calc(60px + var(--safe-bottom));  /* Platz für Nav + Home-Indicator */
     height: calc(100dvh - 120px);
     overflow: hidden;
   }
