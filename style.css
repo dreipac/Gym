@@ -586,7 +586,7 @@ body.route-heute .section.section--fill{
   body.route-kalender .view,
   body.route-konfigurieren .view,
   body.route-einstellungen .view{
-    padding-bottom: calc(76px + var(--safe-bottom)); /* Nav-Höhe + Safe-Area */
+    padding-bottom: calc(60px + var(--safe-bottom)); /* Nav-Höhe + Safe-Area */
   }
 }
 
