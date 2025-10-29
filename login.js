@@ -28,7 +28,7 @@ linkToLogin.addEventListener("click", (e)=>{ e.preventDefault(); show("login"); 
 // already logged in? -> go to app
 (async () => {
   const { data: { session } } = await supabase.auth.getSession();
-  if (session) location.href = "index.html";
+  if (session) location.replace("index.html");
 })();
 
 // login
@@ -45,7 +45,7 @@ formLogin.addEventListener("submit", async (e) => {
     loginMsg.textContent = "Fehler: " + error.message;
     loginMsg.classList.add("err");
   } else {
-    location.href = "index.html";
+    location.replace("index.html"); 
   }
 });
 
