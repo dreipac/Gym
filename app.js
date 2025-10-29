@@ -555,7 +555,17 @@ function renderHeute(root){
   }
   
   const pill = q("#today-plan-pill", root);
-  pill.textContent = entry.type ? entry.type : "Ruhetag / frei";
+ if (entry.type) {
+  // normaler Trainingstag
+  pill.innerHTML = entry.type;
+} else {
+  // Ruhetag: Icon + Text
+  pill.innerHTML = `
+    <img src="icons/sun.svg" alt="" aria-hidden="true" class="pill-icon" />
+    <span>Ruhetag</span>
+  `;
+}
+
   pill.style.background = "none";
   q("#today-note", root).textContent = entry.note || "";
 
@@ -1265,23 +1275,54 @@ function renderSettings(root){
   }
 
 
-  btnExport.addEventListener("click", () => {
-const payload = {
-  version: 2,
-  exportedAt: new Date().toISOString(),
-  plans: state.plans,
-  done: state.done,
-  templates: state.templates,
-  results: state.results || {}
-};
+btnExport.addEventListener("click", () => {
+  const payload = {
+    version: 3,
+    exportedAt: new Date().toISOString(),
 
-    const blob = new Blob([JSON.stringify(payload,null,2)], {type:"application/json"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url; a.download = "gymplan-backup.json";
-    document.body.appendChild(a); a.click(); a.remove();
-    URL.revokeObjectURL(url);
-  });
+    // Hauptdaten
+    plans: state.plans || {},
+    done: state.done || {},
+    templates: state.templates || {},
+    results: state.results || {},
+
+    // NEU: Trainings-Konfigurationen
+    trainings: state.trainings || [],
+
+    // NEU: Stoppuhr-Zustand (optional)
+    timer: state.timer || {},
+    swUi: state.swUi || {},
+    swdrafts: state.swdrafts || {},
+
+    // NEU: User-Infos (Onboarding)
+    user: loadJSON(STORAGE_USER, null),
+
+    // NEU: Theme / Modus
+    theme: state.theme || {},
+
+    // NEU: alle Storage-Versionen zur Kompatibilität
+    storageKeys: {
+      main: STORAGE_KEY,
+      done: STORAGE_DONE,
+      templates: STORAGE_TPL,
+      trainings: STORAGE_TRAININGS,
+      timer: STORAGE_TIMER,
+      user: STORAGE_USER,
+      theme: STORAGE_THEME
+    }
+  };
+
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "gymplan-full-backup.json";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+});
+
 
   fileInput.addEventListener("change", async (e) => {
     const file = e.target.files?.[0];
@@ -1295,6 +1336,29 @@ state.done  = data.done  || {};
 state.templates = data.templates || {};
 state.results = data.results || {};
 savePlans(); saveDone(); saveTemplates(); saveResults();
+
+  // NEU: vollständiger Restore
+  if (data.trainings) {
+    state.trainings = data.trainings;
+    saveTrainings();
+  }
+  if (data.timer) {
+    state.timer = data.timer;
+    saveTimer();
+  }
+  if (data.user) {
+    saveJSON(STORAGE_USER, data.user);
+  }
+  if (data.theme) {
+    state.theme = data.theme;
+    saveTheme();
+    applyTheme();
+  }
+  if (data.swdrafts) {
+    state.swdrafts = data.swdrafts;
+    saveDrafts(state.swdrafts);
+  }
+
 
       alert("Import erfolgreich.");
       location.hash = "#/heute";
