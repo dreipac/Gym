@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+  <title>GymPlan • Anmelden</title>
+  <link rel="stylesheet" href="login.css" />
+
+  <script>
+  window.__SUPABASE_URL = "https://nzkvilfzlalezmjgaame.supabase.co";
+  window.__SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im56a3ZpbGZ6bGFsZXptamdhYW1lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE3NjU4NTYsImV4cCI6MjA3NzM0MTg1Nn0.USsmjgm4SNvXxQRwcV3X9XnvccWDI9QFi6rjYRI-Vy0";
+</script>
+
+
+  <!-- Supabase JS v2 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <main class="auth-wrap">
+    <div class="card">
+      <div class="brand">🏋️ GymPlan</div>
+
+      <div class="tabs">
+        <button id="tab-login" class="tab active" type="button">Anmelden</button>
+        <button id="tab-register" class="tab" type="button">Konto erstellen</button>
+      </div>
+
+      <!-- LOGIN VIEW -->
+      <form id="form-login" class="form" autocomplete="on">
+        <label class="field">
+          <span>E-Mail</span>
+          <input id="login-email" type="email" required autocomplete="email" />
+        </label>
+        <label class="field">
+          <span>Passwort</span>
+          <input id="login-password" type="password" required autocomplete="current-password" />
+        </label>
+        <button class="btn primary" type="submit">Anmelden</button>
+        <p class="muted hint">Noch kein Konto?
+          <a href="#" id="link-to-register">Jetzt erstellen</a>
+        </p>
+        <p id="login-msg" class="msg" role="alert" aria-live="polite"></p>
+      </form>
+
+      <!-- REGISTER VIEW (SPA in der Seite) -->
+      <form id="form-register" class="form" hidden autocomplete="on">
+        <label class="field">
+          <span>E-Mail</span>
+          <input id="reg-email" type="email" required autocomplete="email" />
+        </label>
+        <label class="field">
+          <span>Passwort</span>
+          <input id="reg-password" type="password" minlength="6" required autocomplete="new-password" />
+        </label>
+        <button class="btn primary" type="submit">Konto erstellen</button>
+        <p class="muted hint">Schon ein Konto?
+          <a href="#" id="link-to-login">Jetzt anmelden</a>
+        </p>
+        <p id="reg-msg" class="msg" role="alert" aria-live="polite"></p>
+      </form>
+    </div>
+
+    <footer class="foot">
+      <a href="index.html">Zur Startseite</a>
+    </footer>
+  </main>
+
+  <!-- Deine Projekt-Keys hier einsetzen -->
+  <script>
+    window.__SUPABASE_URL = "https://YOUR-PROJECT-REF.supabase.co";
+    window.__SUPABASE_ANON = "YOUR-ANON-KEY";
+  </script>
+  <script src="login.js"></script>
+</body>
+</html>
