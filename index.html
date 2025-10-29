@@ -11,17 +11,37 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
 
-  <!-- iOS Homescreen-Icon -->
-<link rel="apple-touch-icon" href="icons/logo.png">
+    <!-- iOS Homescreen-Icon -->
+  <link rel="apple-touch-icon" href="icons/logo.png">
 
-<!-- PWA Manifest -->
-<link rel="manifest" href="manifest.webmanifest">
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.webmanifest">
 
-<!-- Empfohlene PWA-Meta für iOS -->
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <!-- Empfohlene PWA-Meta für iOS -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
 </head>
+<!-- Supabase JS v2 -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- Projekt-Keys einsetzen -->
+<script>
+  window.__SUPABASE_URL = "https://nzkvilfzlalezmjgaame.supabase.co";
+  window.__SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im56a3ZpbGZ6bGFsZXptamdhYW1lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE3NjU4NTYsImV4cCI6MjA3NzM0MTg1Nn0.USsmjgm4SNvXxQRwcV3X9XnvccWDI9QFi6rjYRI-Vy0";
+  window.supabaseClient = window.supabase.createClient(window.__SUPABASE_URL, window.__SUPABASE_ANON);
+</script>
+
+<!-- Auth-Gate: ohne Session -> zur Login-Seite -->
+<script>
+  (async () => {
+    const { data: { session } } = await window.supabaseClient.auth.getSession();
+    if (!session) {
+      window.location.href = "login.html";
+    }
+  })();
+</script>
+
 <body class="theme-gradient-glow">
   <div id="app">
 <header class="topbar">
@@ -296,6 +316,13 @@
           </div>
         </div>
 
+        <div class="settings-block">
+          <h3>Abmelden</h3>
+          <p>Beendet die aktuelle Sitzung.</p>
+          <button class="btn subtle" id="btn-logout">Abmelden</button>
+        </div>
+
+
         <a class="btn subtle" href="#/heute">Zurück</a>
       </div>
     </section>
@@ -404,10 +431,18 @@
   </div>
 </div>
 
+<script>
+  (async () => {
+    const { data: { session } } = await window.supabaseClient.auth.getSession();
+    if (!session) {
+      window.location.href = "login.html"; // relativ zu /Gym/
+    }
+  })();
+</script>
+
   <script src="app.js"></script>
 </body>
 </html>
-
 
 
 
