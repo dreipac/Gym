@@ -1670,7 +1670,7 @@ async function initApp(){
   // 🔹 Session prüfen
   const { data: { session } } = await sb.auth.getSession();
   if (!session) {
-    location.href = "login.html";
+    location.replace("login.html");
     return;
   }
   currentUserId = session.user.id;
