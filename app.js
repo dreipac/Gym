@@ -38,7 +38,9 @@ const state = {
   swdrafts: {},
   results: {},
   theme: { black: false },
+  user: null, 
 };
+
 
 
 
@@ -82,6 +84,7 @@ async function cloudSaveAll() {
       swdrafts: state.swdrafts || {},
       results: state.results || {},
       theme: state.theme || {},
+      user: state.user || null, 
     };
     const { error } = await sb
       .from("user_data")
@@ -137,6 +140,14 @@ function keyToDate(key){
   return new Date(y, m-1, d);
 }
 
+function applyTheme(){
+  const isBlack = !!(state.theme && state.theme.black);
+  // Body-Klassen konsistent setzen
+  document.body.classList.toggle("theme-black", isBlack);
+  document.body.classList.toggle("theme-gradient-glow", !isBlack);
+}
+
+
 function loadTrainings(){
   const t = loadJSON(STORAGE_TRAININGS, null);
   // Zielstruktur NEU:
@@ -173,13 +184,6 @@ function loadTrainings(){
   // Defaults (Objektstruktur)
   const defaults = [
     { name:"Ganzkörper", geraete:[] },
-    { name:"Push", geraete:[] },
-    { name:"Pull", geraete:[] },
-    { name:"Beine", geraete:[] },
-    { name:"Oberkörper", geraete:[] },
-    { name:"Cardio", geraete:[] },
-    { name:"HIIT", geraete:[] },
-    { name:"Mobility", geraete:[] },
   ];
   saveJSON(STORAGE_TRAININGS, defaults);
   return defaults;
@@ -572,17 +576,18 @@ function renderHeute(root){
 
   q("#today-date", root).textContent = fmtLong(today);
 
-  const greetEl = q("#home-greeting", root);
-  if (greetEl){
-    const u = loadJSON(STORAGE_USER, null);
-    if (u && u.firstName){
-      greetEl.textContent = `Hallo ${u.firstName}`;
-      greetEl.hidden = false;
-    } else {
-      greetEl.textContent = "";
-      greetEl.hidden = true;
-    }
+const greetEl = q("#home-greeting", root);
+if (greetEl){
+  const u = state.user;
+  if (u && u.firstName){
+    greetEl.textContent = `Hallo ${u.firstName}`;
+    greetEl.hidden = false;
+  } else {
+    greetEl.textContent = "";
+    greetEl.hidden = true;
   }
+}
+
   
   const pill = q("#today-plan-pill", root);
  if (entry.type) {
@@ -1325,7 +1330,8 @@ btnExport.addEventListener("click", () => {
     swdrafts: state.swdrafts || {},
 
     // NEU: User-Infos (Onboarding)
-    user: loadJSON(STORAGE_USER, null),
+    user: state.user || null,
+
 
     // NEU: Theme / Modus
     theme: state.theme || {},
@@ -1377,8 +1383,10 @@ savePlans(); saveDone(); saveTemplates(); saveResults();
     saveTimer();
   }
   if (data.user) {
-    saveJSON(STORAGE_USER, data.user);
+    state.user = data.user;
+    cloudSaveAll();
   }
+
   if (data.theme) {
     state.theme = data.theme;
     saveTheme();
@@ -1612,9 +1620,8 @@ btnSave.addEventListener("click", () => {
 
 /* ---------- Onboarding (Willkommen) ---------- */
 function initWelcome(){
-  // Wenn bereits Benutzer vorhanden → nichts tun
-  const existing = loadJSON(STORAGE_USER, null);
-  if (existing && existing.firstName && existing.lastName) return;
+// Wenn bereits Benutzer vorhanden → nichts tun
+if (state.user && state.user.firstName && state.user.lastName) return;
 
   const $wrap = document.getElementById("welcome-modal");
   const $done = document.getElementById("welcome-done");
@@ -1641,7 +1648,9 @@ function initWelcome(){
     const lastName  = String($last.value  || "").trim();
     if (!firstName || !lastName) return;
 
-    saveJSON(STORAGE_USER, { firstName, lastName, savedAt: new Date().toISOString() });
+    state.user = { firstName, lastName, savedAt: new Date().toISOString() };
+    cloudSaveAll(); // ✅ in Supabase sichern
+
 
     // Erstes Modal schließen, kurzes Bestätigungsmodal zeigen
     $wrap.hidden = true;
@@ -1687,6 +1696,7 @@ async function initApp(){
     state.swdrafts  = data.swdrafts  || {};
     state.results   = data.results   || {};
     state.theme     = data.theme     || state.theme;
+    state.user      = data.user      || null;
   }catch(e){
     console.warn("Cloud-Laden fehlgeschlagen; starte leer:", e?.message);
   }
