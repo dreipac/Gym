@@ -27,52 +27,88 @@ const state = {
   route: "heute",
   selectedDate: todayKey(),
   monthCursor: new Date(),
-  plans: loadJSON(STORAGE_KEY, {}),
-  done:  loadJSON(STORAGE_DONE, {}),
-  templates: loadTemplates(),
-  trainings: loadTrainings(),
-  timer: loadTimer(),
-  swUi: loadJSON(STORAGE_SW_UI, { collapsed: false }),
-  swdrafts: loadDrafts(),
-  results: loadJSON(STORAGE_RESULTS, {}),
-  theme: loadJSON(STORAGE_THEME, { black: false }),
 
-
+  // werden nach Login aus Cloud geladen:
+  plans: {},
+  done: {},
+  templates: {},
+  trainings: [],
+  timer: { startedAt:null, elapsedMs:0, paused:false, pausedAt:null },
+  swUi: { collapsed: false },
+  swdrafts: {},
+  results: {},
+  theme: { black: false },
 };
 
 
-/* ---------- Storage/Utilities ---------- */
-function loadJSON(key, fallback){
-  try { return JSON.parse(localStorage.getItem(key)) ?? fallback; }
-  catch { return fallback; }
-}
-function saveJSON(key, value){
-  localStorage.setItem(key, JSON.stringify(value));
+
+// ============ SUPABASE INTEGRATION ============
+// Client kommt aus index.html
+const sb = window.supabaseClient;
+let currentUserId = null;
+
+/** Lädt alle Benutzerdaten aus der Cloud */
+async function cloudLoadAll() {
+  const { data: { user } } = await sb.auth.getUser();
+  if (!user) throw new Error("Keine Session aktiv");
+  currentUserId = user.id;
+
+  const { data, error } = await sb
+    .from("user_data")
+    .select("data")
+    .eq("id", user.id)
+    .single();
+
+  if (error && error.code !== "PGRST116") {
+    console.error("Cloud-Laden fehlgeschlagen", error);
+    throw error;
+  }
+  return data?.data || {}; // Fallback: leeres Objekt
 }
 
-function loadDrafts(){
-  return loadJSON(STORAGE_SW_DRAFT, {});
+/** Speichert alle states in Supabase (debounced) */
+let __saveTimerCloud = null;
+async function cloudSaveAll() {
+  if (!currentUserId) return;
+  clearTimeout(__saveTimerCloud);
+  __saveTimerCloud = setTimeout(async () => {
+    const payload = {
+      plans: state.plans || {},
+      done: state.done || {},
+      templates: state.templates || {},
+      trainings: state.trainings || [],
+      timer: state.timer || {},
+      swUi: state.swUi || {},
+      swdrafts: state.swdrafts || {},
+      results: state.results || {},
+      theme: state.theme || {},
+    };
+    const { error } = await sb
+      .from("user_data")
+      .upsert({ id: currentUserId, data: payload }, { onConflict: "id" });
+    if (error) console.error("Cloud speichern fehlgeschlagen", error);
+  }, 400);
 }
-function saveDrafts(d){
-  saveJSON(STORAGE_SW_DRAFT, d);
-}
+
+// Wrapper damit bestehende Aufrufe weiter funktionieren
+function loadJSON(_key, fallback){ return fallback; }
+function saveJSON(_key, _value){ /* nicht mehr genutzt */ }
+
+function savePlans(){ cloudSaveAll(); }
+function saveDone(){ cloudSaveAll(); }
+function saveTemplates(){ cloudSaveAll(); }
+function saveTrainings(){ cloudSaveAll(); }
+function saveTimer(){ cloudSaveAll(); }
+function saveDrafts(){ cloudSaveAll(); }
+function saveResults(){ cloudSaveAll(); }
+function saveTheme(){ cloudSaveAll(); }
+
+
+
 function getDraftKey(dateKey=todayKey(), type){
   const t = String(type||"").trim();
   return t ? `${dateKey}::${t.toLowerCase()}` : `${dateKey}::`;
 }
-function saveResults(){
-  saveJSON(STORAGE_RESULTS, state.results || {});
-}
-
-function saveTheme(){
-  saveJSON(STORAGE_THEME, state.theme || { black:false });
-}
-function applyTheme(){
-  document.body.classList.toggle("theme-black", !!(state.theme && state.theme.black));
-}
-
-
-
 function loadTemplates(){
   const t = loadJSON(STORAGE_TPL, null);
   if(t) return t;
@@ -100,9 +136,6 @@ function keyToDate(key){
   const [y,m,d] = key.split("-").map(Number);
   return new Date(y, m-1, d);
 }
-function savePlans(){ saveJSON(STORAGE_KEY, state.plans); }
-function saveDone(){  saveJSON(STORAGE_DONE, state.done); }
-function saveTemplates(){ saveJSON(STORAGE_TPL, state.templates); }
 
 function loadTrainings(){
   const t = loadJSON(STORAGE_TRAININGS, null);
@@ -153,9 +186,6 @@ function loadTrainings(){
 }
 
 
-function saveTrainings(){
-  saveJSON(STORAGE_TRAININGS, state.trainings);
-}
 
 function getTrainingByName(name){
   return state.trainings.find(t => String(t.name || "").toLowerCase() === String(name || "").toLowerCase()) || null;
@@ -183,7 +213,7 @@ function loadTimer(){
     pausedAt: raw.pausedAt ?? null
   };
 }
-function saveTimer(){ saveJSON(STORAGE_TIMER, state.timer); }
+
 
 function isTrainingDay(key=todayKey()){
   const e = state.plans[key];
@@ -1633,57 +1663,56 @@ function initWelcome(){
 /* ---------- Init ---------- */
 window.addEventListener("hashchange", () => setRoute(location.hash));
 
-document.addEventListener("DOMContentLoaded", () => {
+// ---------- Init (Supabase Cloud-Version) ----------
+document.addEventListener("DOMContentLoaded", () => initApp());
+
+async function initApp(){
+  // 🔹 Session prüfen
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) {
+    location.href = "login.html";
+    return;
+  }
+  currentUserId = session.user.id;
+
+  // 🔹 Cloud-Daten laden
+  try{
+    const data = await cloudLoadAll();
+    state.plans     = data.plans     || {};
+    state.done      = data.done      || {};
+    state.templates = data.templates || {};
+    state.trainings = data.trainings || loadTrainings();
+    state.timer     = data.timer     || state.timer;
+    state.swUi      = data.swUi      || state.swUi;
+    state.swdrafts  = data.swdrafts  || {};
+    state.results   = data.results   || {};
+    state.theme     = data.theme     || state.theme;
+  }catch(e){
+    console.warn("Cloud-Laden fehlgeschlagen; starte leer:", e?.message);
+  }
+
+  // 🔹 Route setzen + Rendering starten
   if (!location.hash) location.hash = "#/heute";
   setRoute(location.hash);
-
-  // Spotlight initial ausrichten (nach erstem Render)
   updateNavSpot();
 
-  // Mobile 9-Punkte-Menü (falls im DOM vorhanden)
-  (function initMobileMenu(){
-    const btn = q("#menu-btn");
-    const pop = q("#menu-pop");
-    if(!btn || !pop) return;
-
-    function openMenu(){
-      pop.classList.add("active");
-      btn.setAttribute("aria-expanded", "true");
-      pop.setAttribute("aria-hidden", "false");
-      const first = pop.querySelector(".menu-item");
-      if(first) first.focus();
-    }
-    function closeMenu(){
-      pop.classList.remove("active");
-      btn.setAttribute("aria-expanded", "false");
-      pop.setAttribute("aria-hidden", "true");
-    }
-    function toggleMenu(e){
-      e.stopPropagation();
-      if(pop.classList.contains("active")) closeMenu(); else openMenu();
-    }
-
-    btn.addEventListener("click", toggleMenu);
-    document.addEventListener("click", (e) => {
-      if(pop.classList.contains("active") && !pop.contains(e.target) && e.target !== btn){
-        closeMenu();
-      }
-    });
-    document.addEventListener("keydown", (e) => {
-      if(e.key === "Escape") closeMenu();
-    });
-    pop.querySelectorAll(".menu-item").forEach(a => {
-      a.addEventListener("click", () => { closeMenu(); });
-    });
-  })();
-
-  // 👉 Unsere neue Drag-/Scrub-Geste aktivieren
-  initNavDrag();
-
-  // Bei Resize die Spot-Position aktualisieren
-  window.addEventListener("resize", updateNavSpot);
-
-  // 👉 Onboarding beim ersten Start
+  // 🔹 Initiales Setup
   initWelcome();
   applyTheme();
-});
+
+  // 🔹 Logout-Button aktivieren (wenn vorhanden)
+  const onHash = () => {
+    const btnLogout = document.getElementById("btn-logout");
+    if (btnLogout) {
+      btnLogout.onclick = async () => {
+        await sb.auth.signOut();
+        location.href = "login.html";
+      };
+    }
+  };
+  window.addEventListener("hashchange", () => {
+    setRoute(location.hash);
+    onHash();
+  });
+  onHash();
+}
