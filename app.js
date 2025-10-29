@@ -304,52 +304,47 @@ function setRoute(hash){
 
   const view = q("#view");
 
-  // Richtung bestimmen (nur für die 4 Tabs relevant)
+  // Richtung bestimmen (nur Haupttabs relevant)
   const prevIdx   = ROUTE_ORDER.indexOf(state.route);
   const targetIdx = ROUTE_ORDER.indexOf(nextRoute);
-  let dirClass = "dir-forward"; // Default
-
+  let dirClass = "dir-forward";
   if (prevIdx !== -1 && targetIdx !== -1) {
     dirClass = (targetIdx > prevIdx) ? "dir-forward" : "dir-backward";
   }
 
   const doSwitch = () => {
-    // Inhalt wechseln
     state.route = nextRoute;
     render();
     highlightNav();
 
-    // Body-Klassen für mobile Scroll-Logik
     document.body.classList.toggle("route-kalender", state.route === "kalender");
     document.body.classList.toggle("route-heute",    state.route === "heute");
 
-    // ENTER-Phase (Richtungsklasse setzen)
+    // ENTER-Phase
     if (view){
       view.classList.remove("dir-forward","dir-backward");
       view.classList.add(dirClass);
       view.classList.add("route-enter");
 
-      // nächster Frame: aktive Enter-Transition
       requestAnimationFrame(() => {
         view.classList.add("route-enter-active");
-        view.addEventListener("transitionend", () => {
+        const onEnterEnd = (e) => {
+          if (e.propertyName !== "transform") return; // nur auf transform reagieren
+          view.removeEventListener("transitionend", onEnterEnd);
           view.classList.remove("route-enter","route-enter-active");
           __routeAnimating = false;
-
-          // Low-FX aus + Inline-Hinweise zurücksetzen
           document.body.classList.remove("animating");
           try{
             view.style.willChange = "";
-            view.style.transform = "";
           }catch{}
-        }, { once:true });
+        };
+        view.addEventListener("transitionend", onEnterEnd);
       });
     } else {
       __routeAnimating = false;
       document.body.classList.remove("animating");
       try{
         view.style.willChange = "";
-        view.style.transform = "";
       }catch{}
     }
   };
@@ -365,32 +360,32 @@ function setRoute(hash){
 
   __routeAnimating = true;
 
-  // === EXIT-Phase ===
-  // Low-FX AN bevor wir irgendwas animieren (verhindert teure Repaints)
+  // EXIT-Phase – Low-FX an (reduziert Repaints)
   document.body.classList.add("animating");
 
   view.classList.remove("dir-forward","dir-backward");
   view.classList.add(dirClass);
   view.classList.add("route-exit");
 
-  // Doppelte rAF-Sequenz: Layout flushen, dann animieren (verhindert Stottern)
+  // Doppel-rAF: Layout flush → animieren
   requestAnimationFrame(() => {
-    // Force layer + will-change explizit (zusätzlich zum CSS, falls das noch nicht greift)
     try{
-      view.style.willChange = "transform, opacity";
-      view.style.transform = "translateZ(0)";
+      view.style.willChange = "transform, opacity"; // ⚠️ kein inline transform setzen!
     }catch{}
     requestAnimationFrame(() => {
       view.classList.add("route-exit-active");
-      view.addEventListener("transitionend", () => {
+      const onExitEnd = (e) => {
+        if (e.propertyName !== "transform") return; // nur auf transform reagieren
+        view.removeEventListener("transitionend", onExitEnd);
         view.classList.remove("route-exit","route-exit-active");
-
-        // Danach neuen Inhalt einblenden
         doSwitch();
-      }, { once:true });
+      };
+      view.addEventListener("transitionend", onExitEnd);
     });
   });
 }
+
+
 
 
 
@@ -488,13 +483,17 @@ function initNavDrag(){
     // Auslösen der Navigation auf dem Icon, wo losgelassen wurde
     const t = e.changedTouches && e.changedTouches[0];
     const el = t ? linkFromTouch(t) : null;
-    if (el) {
-      const href = el.getAttribute("href") || `#/${el.getAttribute("data-route") || ""}`;
-      if (href) {
-        location.hash = href;
-        setRoute(location.hash);
-      }
+if (el) {
+  const href = el.getAttribute("href") || `#/${el.getAttribute("data-route") || ""}`;
+  if (!href) return;
+    if (location.hash === href) {
+      // gleicher Tab: kein hashchange → manuell rendern
+      setRoute(href);
+    } else {
+      // anderer Tab: hash setzen → hashchange triggert setRoute
+      location.hash = href;
     }
+  }
     // Spot zurück auf aktiven Tab setzen
     updateNavSpot();
   };
