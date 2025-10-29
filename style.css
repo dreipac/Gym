@@ -790,14 +790,14 @@ body.route-heute .section.section--fill{
   .view.route-exit-active.dir-forward {
     transform: translate3d(-100%, 0, 0);
     opacity: 1;
-    transition: transform .22s cubic-bezier(.22,.9,.26,1);
+    transition: transform .10s cubic-bezier(.22,.9,.26,1);
   }
 
   .view.route-exit.dir-backward        { transform: translate3d(0,0,0); opacity: 1; }
   .view.route-exit-active.dir-backward {
     transform: translate3d(100%, 0, 0);
     opacity: 1;
-    transition: transform .22s cubic-bezier(.22,.9,.26,1);
+    transition: transform .10s cubic-bezier(.22,.9,.26,1);
   }
 
   /* ENTER: neuer Inhalt fährt komplett rein */
@@ -805,14 +805,14 @@ body.route-heute .section.section--fill{
   .view.route-enter-active.dir-forward {
     transform: translate3d(0, 0, 0);
     opacity: 1;
-    transition: transform .22s cubic-bezier(.22,.9,.26,1);
+    transition: transform .10s cubic-bezier(.22,.9,.26,1);
   }
 
   .view.route-enter.dir-backward        { transform: translate3d(-100%, 0, 0); opacity: 1; }
   .view.route-enter-active.dir-backward {
     transform: translate3d(0, 0, 0);
     opacity: 1;
-    transition: transform .22s cubic-bezier(.22,.9,.26,1);
+    transition: transform .10s cubic-bezier(.22,.9,.26,1);
   }
 }
 
@@ -2077,4 +2077,42 @@ body.route-kalender .section label{
   body.theme-black.route-kalender .mobile-cal-title {
     color: #ffffff;
   }
+}
+
+/* === iOS Performance: Low-FX während Routenanimation === */
+@supports (-webkit-touch-callout: none) {
+  /* Große Schatten & Glas-Effekte aus */
+  body.animating .glass,
+  body.animating .list li,
+  body.animating .stat,
+  body.animating .settings-block {
+    box-shadow: none !important;
+  }
+
+  body.animating .topbar,
+  body.animating .footer {
+    backdrop-filter: none !important;
+  }
+
+  /* Glow-Spots temporär weg */
+  body.animating #app::before,
+  body.animating #app::after {
+    display: none !important;
+  }
+
+  /* Spotlight-Buckel nicht mitanimieren */
+  body.animating .nav-spot {
+    display: none !important;
+  }
+
+  /* Animierte View sicher auf die GPU schieben */
+  body.animating .view {
+    will-change: transform, opacity !important;
+    transform: translate3d(0,0,0) !important;
+  }
+}
+
+/* iOS: die View generell auf eine eigene Compositing-Layer */
+@supports (-webkit-touch-callout: none) {
+  .view { transform: translateZ(0); }
 }
